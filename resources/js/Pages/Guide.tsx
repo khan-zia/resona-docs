@@ -192,7 +192,7 @@ export default function Guide() {
                                 <div className="mt-8 flex flex-col gap-6">
                                     <DocsStatCard
                                         label="Control Plane"
-                                        value="https://resona.dev"
+                                        value="https://resona.dev/api"
                                         caption="REST API for profiles and sessions"
                                     />
                                     <DocsStatCard
@@ -222,15 +222,25 @@ export default function Guide() {
                                     title="Agent Profiles"
                                     description="Profiles bundle system instructions, tools, and voice settings. Voice names are case-insensitive."
                                 />
-                                <div className="mt-8 space-y-6">
-                                    <DocsKeyValueList
-                                        items={[
-                                            { label: 'Voice', value: 'Use the voice name (e.g., Grant), case-insensitive.' },
-                                            { label: 'Domain context', value: 'Optional structured context for business facts.' },
-                                            { label: 'Tools', value: 'Provide strict JSON Schema for tool calls.' },
-                                            { label: 'Agent speaks first', value: 'Boolean flag for greeting behavior.' },
-                                        ]}
-                                    />
+                                <div className="mt-8 space-y-10">
+                                    <div className="grid gap-x-12 gap-y-8 sm:grid-cols-2">
+                                        <div className="space-y-2">
+                                            <h3 className="text-sm font-bold text-white">Voice</h3>
+                                            <p className="text-[14px] text-slate-400">Use the voice name (e.g., Grant), case-insensitive.</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <h3 className="text-sm font-bold text-white">Domain context</h3>
+                                            <p className="text-[14px] text-slate-400">Optional structured context for business facts.</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <h3 className="text-sm font-bold text-white">Tools</h3>
+                                            <p className="text-[14px] text-slate-400">Provide strict JSON Schema for tool calls.</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <h3 className="text-sm font-bold text-white">Agent speaks first</h3>
+                                            <p className="text-[14px] text-slate-400">Boolean flag for greeting behavior.</p>
+                                        </div>
+                                    </div>
                                     <div className="space-y-4">
                                         <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Create Profile (Request)</p>
                                         <DocsCodeBlock language="json" code={createProfileRequest} />
@@ -242,7 +252,15 @@ export default function Guide() {
                                 <DocsCard variant="deep" size="lg">
                                     <DocsSectionHeader
                                         title="Tools JSON Rules"
-                                        description="Tools are validated strictly. Keep schemas small, explicit, and consistent."
+                                        description={
+                                            <>
+                                                Tools are validated strictly. Keep schemas small, explicit, and consistent.
+                                                <br />
+                                                <span className="mt-2 block text-xs font-medium text-slate-500">
+                                                    Full validation rules, supported keywords, and format lists are documented in the API Reference.
+                                                </span>
+                                            </>
+                                        }
                                     />
                                     <DocsChecklist
                                         items={[
@@ -254,9 +272,6 @@ export default function Guide() {
                                         ]}
                                         className="mt-8"
                                     />
-                                    <p className="mt-6 text-xs text-slate-500">
-                                        Full validation rules, supported keywords, and format lists are documented in the API Reference.
-                                    </p>
                                 </DocsCard>
                             </section>
 
@@ -271,40 +286,41 @@ export default function Guide() {
                                         <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Create Session (Request)</p>
                                         <DocsCodeBlock language="json" code={createSessionRequest} />
                                     </div>
-                                    <DocsCard variant="glass" size="md">
-                                        <div className="space-y-4">
-                                            <DocsBadge tone="emerald">WebRTC Response</DocsBadge>
-                                            <DocsCodeBlock language="json" code={webrtcSessionResponse} />
-                                        </div>
-                                    </DocsCard>
-                                    <DocsCard variant="glass" size="md">
-                                        <div className="space-y-4">
-                                            <DocsBadge tone="cyan">WebSocket Response</DocsBadge>
-                                            <DocsCodeBlock language="json" code={websocketSessionResponse} />
-                                        </div>
-                                    </DocsCard>
+                                    <div className="space-y-4">
+                                        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">WebRTC Response</p>
+                                        <DocsCodeBlock language="json" code={webrtcSessionResponse} />
+                                    </div>
+                                    <div className="space-y-4">
+                                        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">WebSocket Response</p>
+                                        <DocsCodeBlock language="json" code={websocketSessionResponse} />
+                                    </div>
                                 </div>
                             </section>
 
                             <section id="webrtc" className="scroll-mt-32">
-                                <DocsSectionHeader
-                                    eyebrow={<DocsEyebrow>Transport</DocsEyebrow>}
-                                    title="WebRTC Integration"
-                                    description="Use WebRTC for low-latency audio plus a data channel for events."
-                                />
-                                <DocsChecklist
-                                    items={[
-                                        'Create a session with transport = webrtc and codec = pcm16.',
-                                        'Create RTCPeerConnection using ice_servers from session response.',
-                                        'Add microphone track and create data channel named events.',
-                                        'POST SDP offer to webrtc_url, apply sdp_answer.',
-                                        'Exchange ICE candidates using /webrtc/signal (preferred) or /webrtc/candidates.',
-                                    ]}
-                                    className="mt-8"
-                                />
-                                <p className="mt-6 text-xs text-slate-500">
-                                    Full SDP, signaling, and candidate payloads are listed in the API Reference.
-                                </p>
+                                    <DocsSectionHeader
+                                        eyebrow={<DocsEyebrow>Transport</DocsEyebrow>}
+                                        title="WebRTC Integration"
+                                        description={
+                                            <>
+                                                Use WebRTC for low-latency audio plus a data channel for events.
+                                                <br />
+                                                <span className="mt-2 block text-xs font-medium text-slate-500">
+                                                    Full SDP, signaling, and candidate payloads are listed in the API Reference.
+                                                </span>
+                                            </>
+                                        }
+                                    />
+                                    <DocsChecklist
+                                        items={[
+                                            'Create a session with transport = webrtc and codec = pcm16.',
+                                            'Create RTCPeerConnection using ice_servers from session response.',
+                                            'Add microphone track and create data channel named events.',
+                                            'POST SDP offer to webrtc_url, apply sdp_answer.',
+                                            'Exchange ICE candidates using /webrtc/signal (preferred) or /webrtc/candidates.',
+                                        ]}
+                                        className="mt-8"
+                                    />
                             </section>
 
                             <section id="websocket" className="scroll-mt-32">
@@ -332,26 +348,45 @@ export default function Guide() {
                                 <DocsSectionHeader
                                     eyebrow={<DocsEyebrow>Events</DocsEyebrow>}
                                     title="Events & Tool Calls"
-                                    description="Token events stream transcripts. Tool calls must be answered within 60 seconds."
+                                    description={
+                                        <>
+                                            Token events stream transcripts. Tool calls must be answered within 60 seconds.
+                                            <br />
+                                            <span className="mt-2 block text-xs font-medium text-slate-500">
+                                                Full event payloads and error envelopes are in the API Reference.
+                                            </span>
+                                        </>
+                                    }
                                 />
-                                <DocsKeyValueList
-                                    items={[
-                                        { label: 'token', value: 'User/assistant transcripts over data channel or WebSocket.' },
-                                        { label: 'tool.call', value: 'Execute a tool and reply with tool.result.' },
-                                        { label: 'tool.result', value: 'Echo tool_use_id with response or error.' },
-                                    ]}
-                                    className="mt-8"
-                                />
-                                <p className="mt-6 text-xs text-slate-500">
-                                    Full event payloads and error envelopes are in the API Reference.
-                                </p>
+                                <div className="mt-10 grid gap-x-12 gap-y-8 sm:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <h3 className="text-sm font-bold text-white">token</h3>
+                                        <p className="text-[14px] text-slate-400">User/assistant transcripts over data channel or WebSocket.</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-sm font-bold text-white">tool.call</h3>
+                                        <p className="text-[14px] text-slate-400">Execute a tool and reply with tool.result.</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-sm font-bold text-white">tool.result</h3>
+                                        <p className="text-[14px] text-slate-400">Echo tool_use_id with response or error.</p>
+                                    </div>
+                                </div>
                             </section>
 
                             <section id="errors-limits" className="scroll-mt-32">
                                 <DocsCard variant="muted" size="lg">
                                     <DocsSectionHeader
                                         title="Errors & Limits"
-                                        description="Plan for validation errors, transport mismatches, and hard limits."
+                                        description={
+                                            <>
+                                                Plan for validation errors, transport mismatches, and hard limits.
+                                                <br />
+                                                <span className="mt-2 block text-xs font-medium text-slate-500">
+                                                    The full list of public error codes and limits is documented in the API Reference.
+                                                </span>
+                                            </>
+                                        }
                                     />
                                     <DocsChecklist
                                         items={[
@@ -362,9 +397,6 @@ export default function Guide() {
                                         ]}
                                         className="mt-8"
                                     />
-                                    <p className="mt-6 text-xs text-slate-500">
-                                        The full list of public error codes and limits is documented in the API Reference.
-                                    </p>
                                 </DocsCard>
                             </section>
                         </div>

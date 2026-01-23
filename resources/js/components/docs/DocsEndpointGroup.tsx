@@ -21,7 +21,7 @@ export default function DocsEndpointGroup({ title, description, endpoints }: Doc
             <div className="mt-6 flex flex-col gap-3 text-sm text-slate-200">
                 {endpoints.map((endpoint) => (
                     <div
-                        key={endpoint.path}
+                        key={`${endpoint.method}-${endpoint.path}`}
                         className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3"
                     >
                         <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs uppercase tracking-[0.18em] text-emerald-200">

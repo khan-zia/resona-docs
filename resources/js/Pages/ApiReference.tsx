@@ -35,27 +35,32 @@ const apiNav = [
 ];
 
 const voiceRows = [
-    ['Grant', 'Deep, resonant & stoic', 'General'],
-    ['Aiden', 'Bright, uplifting, gentle', 'General'],
-    ['Mira', 'Calm, steady & approachable', 'General'],
-    ['Derek', 'Confident, enunciating & energetic', 'General'],
-    ['Lena', 'Lively, warm & expressive', 'General'],
-    ['Theo', 'Soft, friendly & laid-back', 'General'],
-    ['Rupert', 'British, clear & mature', 'General'],
-    ['Mateo', 'Best for Spanish, steady & formal', 'Spanish'],
-    ['Clara', 'Best for Spanish, crisp & calm', 'Spanish'],
-    ['Lukas', 'Best for German, smooth & subtle', 'German'],
-    ['Frida', 'Best for German, warm & energetic', 'German'],
-    ['Luc', 'Best for French, clear & formal', 'French'],
-    ['Rui', 'Best for Portuguese, calm & clear', 'Portuguese'],
-    ['Sofia', 'Best for Portuguese, friendly & natural', 'Portuguese'],
-    ['Nabil', 'Best for Arabic, crisp & confident', 'Arabic'],
-    ['Layla', 'Best for Arabic, natural & clear', 'Arabic'],
-    ['Elif', 'Best for Turkish, friendly & clear', 'Turkish'],
-    ['Oskar', 'Best for Swedish, natural & relaxed', 'Swedish'],
-    ['Luca', 'Best for Italian, crisp & charismatic', 'Italian'],
-    ['Irina', 'Best for Russian, friendly & formal', 'Russian'],
+    ['Mateo', 'Best for Spanish, steady & formal', 'Best for Spanish'],
+    ['Clara', 'Best for Spanish, crisp & calm', 'Best for Spanish'],
+    ['Lukas', 'Best for German, smooth & subtle', 'Best for German'],
+    ['Frida', 'Best for German, warm & energetic', 'Best for German'],
+    ['Luc', 'Best for French, clear & formal', 'Best for French'],
+    ['Rui', 'Best for Portuguese, calm & clear', 'Best for Portuguese'],
+    ['Sofia', 'Best for Portuguese, friendly & natural', 'Best for Portuguese'],
+    ['Nabil', 'Best for Arabic, crisp & confident', 'Best for Arabic'],
+    ['Layla', 'Best for Arabic, natural & clear', 'Best for Arabic'],
+    ['Elif', 'Best for Turkish, friendly & clear', 'Best for Turkish'],
+    ['Oskar', 'Best for Swedish, natural & relaxed', 'Best for Swedish'],
+    ['Luca', 'Best for Italian, crisp & charismatic', 'Best for Italian'],
+    ['Irina', 'Best for Russian, friendly & formal', 'Best for Russian'],
 ];
+
+const generalVoices = [
+    ['Grant', 'Deep, resonant & stoic', 'Best for English'],
+    ['Aiden', 'Bright, uplifting, gentle', 'Best for English'],
+    ['Mira', 'Calm, steady & approachable', 'Best for English'],
+    ['Derek', 'Confident, enunciating & energetic', 'Best for English'],
+    ['Lena', 'Lively, warm & expressive', 'Best for English'],
+    ['Theo', 'Soft, friendly & laid-back', 'Best for English'],
+    ['Rupert', 'British, clear & mature', 'Best for English'],
+];
+
+const allVoiceRows = [...generalVoices, ...voiceRows];
 
 const endpointGroups = [
     {
@@ -490,7 +495,7 @@ export default function ApiReference() {
                                 <div className="mt-8 flex flex-col gap-6">
                                     <DocsStatCard
                                         label="Control Plane"
-                                        value="https://resona.dev"
+                                        value="https://resona.dev/api"
                                         caption="REST API base"
                                     />
                                     <DocsStatCard
@@ -505,10 +510,10 @@ export default function ApiReference() {
                             </section>
 
                             <section id="auth" className="scroll-mt-32">
-                                <DocsCard variant="accent" size="md">
+                                <DocsCard size="md">
                                     <div className="space-y-6">
                                         <DocsSectionHeader
-                                            eyebrow={<DocsEyebrow tone="accent">Security</DocsEyebrow>}
+                                            eyebrow={<DocsEyebrow>Security</DocsEyebrow>}
                                             title="Authentication"
                                             description="All REST requests must include your secret API key in the Authorization header."
                                         />
@@ -518,19 +523,24 @@ export default function ApiReference() {
                             </section>
 
                             <section id="voices" className="scroll-mt-32">
-                                <DocsSectionHeader
-                                    title="Voices Catalog"
-                                    description="Voice names are case-insensitive in requests and normalized internally."
-                                />
-                                <div className="mt-8 space-y-4">
-                                    <DocsTable
-                                        headers={['Name', 'Description', 'Language hint']}
-                                        rows={voiceRows}
+                                    <DocsSectionHeader
+                                        title="Voices Catalog"
+                                        description={
+                                            <>
+                                                Voice names are case-insensitive in requests and normalized internally.
+                                                <br />
+                                                <span className="mt-2 block text-xs font-medium text-slate-500">
+                                                    All voices can be used across Resona-supported languages, but the "Best for" voices above are tuned for those languages.
+                                                </span>
+                                            </>
+                                        }
                                     />
-                                    <p className="text-xs text-slate-500">
-                                        All voices can be used across Resona-supported languages, but the "Best for" voices above are tuned for those languages.
-                                    </p>
-                                </div>
+                                    <div className="mt-8">
+                                        <DocsTable
+                                            headers={['Name', 'Description', 'Language hint']}
+                                            rows={allVoiceRows}
+                                        />
+                                    </div>
                             </section>
 
                             <section id="agent-object" className="scroll-mt-32">
@@ -538,16 +548,27 @@ export default function ApiReference() {
                                     title="Agent Profile Object"
                                     description="This is the full response shape returned by create/update requests."
                                 />
-                                <DocsCodeBlock language="json" code={agentProfileResponse} className="mt-8" />
-                                <DocsKeyValueList
-                                    className="mt-8"
-                                    items={[
-                                        { label: 'agent_id', value: 'Route key (not the numeric database id).' },
-                                        { label: 'voice', value: 'Unique voice name from the catalog, case-insensitive in requests.' },
-                                        { label: 'tools_json', value: 'Stored as JSON and returned as an array.' },
-                                        { label: 'domain_context', value: 'Stored as JSON and returned as an object (or null).' },
-                                    ]}
-                                />
+                                <div className="mt-8 space-y-10">
+                                    <DocsCodeBlock language="json" code={agentProfileResponse} />
+                                    <div className="grid gap-x-12 gap-y-8 sm:grid-cols-2">
+                                        <div className="space-y-2">
+                                            <h3 className="text-sm font-bold text-white"><code>agent_id</code></h3>
+                                            <p className="text-[14px] text-slate-400">Route key (not the numeric database id).</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <h3 className="text-sm font-bold text-white"><code>voice</code></h3>
+                                            <p className="text-[14px] text-slate-400">Unique voice name from the catalog, case-insensitive in requests.</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <h3 className="text-sm font-bold text-white"><code>tools_json</code></h3>
+                                            <p className="text-[14px] text-slate-400">Stored as JSON and returned as an array.</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <h3 className="text-sm font-bold text-white"><code>domain_context</code></h3>
+                                            <p className="text-[14px] text-slate-400">Stored as JSON and returned as an object (or null).</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </section>
 
                             <section id="domain-context" className="scroll-mt-32">
@@ -555,14 +576,20 @@ export default function ApiReference() {
                                     title="Domain Context"
                                     description="Optional structured context that helps the model understand your business."
                                 />
-                                <DocsKeyValueList
-                                    className="mt-8"
-                                    items={[
-                                        { label: 'context.text', value: 'Freeform background or memory (max 2000 chars). Prefer this over bloating system_instructions.' },
-                                        { label: 'context.general', value: 'Array of key/value facts (hours, timezone, locations).' },
-                                        { label: 'context.terms', value: 'Canonical terms, acronyms, or spellings the model should use.' },
-                                    ]}
-                                />
+                                <div className="mt-8 grid gap-x-12 gap-y-8 sm:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <h3 className="text-sm font-bold text-white">context.text</h3>
+                                        <p className="text-[14px] text-slate-400">Freeform background or memory (max 2000 chars). Prefer this over bloating system_instructions.</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-sm font-bold text-white">context.general</h3>
+                                        <p className="text-[14px] text-slate-400">Array of key/value facts (hours, timezone, locations).</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-sm font-bold text-white">context.terms</h3>
+                                        <p className="text-[14px] text-slate-400">Canonical terms, acronyms, or spellings the model should use.</p>
+                                    </div>
+                                </div>
                             </section>
 
                             <section id="system-instructions" className="scroll-mt-32">
@@ -587,32 +614,44 @@ export default function ApiReference() {
                                     title="Tools JSON Validation Rules"
                                     description="tools_json is validated strictly. Requests are rejected if any tool violates these rules."
                                 />
-                                <div className="mt-10 space-y-8">
-                                    <DocsCard variant="glass" size="md">
+                                <div className="mt-12 space-y-16">
+                                    <div className="space-y-6">
                                         <DocsSectionHeader
                                             title="Tool List Limits"
-                                            description="Hard caps enforced by the API."
+                                            titleClassName="!text-lg"
+                                            description={
+                                                <>
+                                                    Hard caps enforced by the API.
+                                                    <br />
+                                                    <span className="mt-1 block text-xs font-medium text-slate-500">
+                                                        Optional parameters are calculated as properties minus required across the entire tools array.
+                                                    </span>
+                                                </>
+                                            }
                                         />
-                                    <DocsKeyValueList
-                                        className="mt-6"
-                                        items={[
-                                            { label: 'Max tools per profile', value: '15' },
-                                            { label: 'tools_json size (minified)', value: '7,500 characters or less' },
-                                            { label: 'Optional params across all tools', value: '24 or less' },
-                                        ]}
-                                    />
-                                    <p className="mt-4 text-xs text-slate-500">
-                                        Optional parameters are calculated as properties minus required across the entire tools array.
-                                    </p>
-                                </DocsCard>
+                                        <div className="grid gap-x-12 gap-y-6 sm:grid-cols-3">
+                                            <div className="space-y-1">
+                                                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Max tools</p>
+                                                <p className="text-xl font-bold text-white">15</p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Size limit</p>
+                                                <p className="text-xl font-bold text-white">7,500 <span className="text-xs font-normal text-slate-400">chars</span></p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Optional params</p>
+                                                <p className="text-xl font-bold text-white">24</p>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                    <DocsCard variant="glass" size="md">
+                                    <div className="space-y-6">
                                         <DocsSectionHeader
                                             title="Tool Object Shape"
+                                            titleClassName="!text-lg"
                                             description="Each tool object may only contain these top-level keys."
                                         />
                                         <DocsChecklist
-                                            className="mt-6"
                                             items={[
                                                 'Allowed keys: name, description, input_schema, parameters.',
                                                 'name is required and must match ^[a-zA-Z0-9_-]{1,64}$.',
@@ -622,15 +661,15 @@ export default function ApiReference() {
                                                 'input_schema/parameters must be a JSON Schema object.',
                                             ]}
                                         />
-                                    </DocsCard>
+                                    </div>
 
-                                    <DocsCard variant="glass" size="md">
+                                    <div className="space-y-6">
                                         <DocsSectionHeader
                                             title="Strict Object Rules"
+                                            titleClassName="!text-lg"
                                             description="These apply to every object schema, including nested ones."
                                         />
                                         <DocsChecklist
-                                            className="mt-6"
                                             items={[
                                                 'additionalProperties is required and must be false.',
                                                 'properties is required and must be an object keyed by parameter names.',
@@ -638,96 +677,65 @@ export default function ApiReference() {
                                                 'Max nesting depth is 5 levels.',
                                             ]}
                                         />
-                                    </DocsCard>
+                                    </div>
 
-                                    <DocsCard variant="glass" size="md">
-                                        <DocsSectionHeader
-                                            title="Supported JSON Schema Types"
-                                            description="Only these types are accepted."
-                                        />
-                                        <DocsTable
-                                            headers={['Type']}
-                                            rows={[
-                                                ['object'],
-                                                ['array'],
-                                                ['string'],
-                                                ['integer'],
-                                                ['number'],
-                                                ['boolean'],
-                                                ['null'],
-                                            ]}
-                                        />
-                                    </DocsCard>
+                                    <div className="grid gap-12 sm:grid-cols-2">
+                                        <div className="space-y-6">
+                                            <DocsSectionHeader
+                                                title="JSON Schema Types"
+                                                titleClassName="!text-lg"
+                                                description="Accepted types."
+                                            />
+                                            <DocsTable
+                                                headers={['Type']}
+                                                rows={[['object'], ['array'], ['string'], ['integer'], ['number'], ['boolean'], ['null']]}
+                                            />
+                                        </div>
+                                        <div className="space-y-6">
+                                            <DocsSectionHeader
+                                                title="String Formats"
+                                                titleClassName="!text-lg"
+                                                description="Allowed formats."
+                                            />
+                                            <DocsTable
+                                                headers={['Format']}
+                                                rows={[
+                                                    ['date-time'], ['time'], ['date'], ['duration'], ['email'],
+                                                    ['hostname'], ['uri'], ['ipv4'], ['ipv6'], ['uuid']
+                                                ]}
+                                            />
+                                        </div>
+                                    </div>
 
-                                    <DocsCard variant="glass" size="md">
+                                    <div className="space-y-6">
                                         <DocsSectionHeader
-                                            title="Supported String Formats"
-                                            description="The following formats are allowed for string types."
-                                        />
-                                        <DocsTable
-                                            headers={['Format']}
-                                            rows={[
-                                                ['date-time'],
-                                                ['time'],
-                                                ['date'],
-                                                ['duration'],
-                                                ['email'],
-                                                ['hostname'],
-                                                ['uri'],
-                                                ['ipv4'],
-                                                ['ipv6'],
-                                                ['uuid'],
-                                            ]}
-                                        />
-                                    </DocsCard>
-
-                                    <DocsCard variant="glass" size="md">
-                                        <DocsSectionHeader
-                                            title="Allowed / Disallowed Keywords"
+                                            title="Allowed Keywords"
+                                            titleClassName="!text-lg"
                                             description="The validator only supports a strict subset of JSON Schema."
                                         />
-                                        <DocsKeyValueList
-                                            className="mt-6"
-                                            items={[
-                                                {
-                                                    label: 'Allowed',
-                                                    value: 'type, properties, required, items, enum, const, format, pattern, anyOf, allOf, $ref, $defs/definitions/$def',
-                                                },
-                                                {
-                                                    label: 'Not supported',
-                                                    value: 'oneOf, not, if, then, else',
-                                                },
-                                                {
-                                                    label: 'Not supported (numeric)',
-                                                    value: 'minimum, maximum, exclusiveMinimum, exclusiveMaximum, multipleOf',
-                                                },
-                                                {
-                                                    label: 'Not supported (string)',
-                                                    value: 'minLength, maxLength',
-                                                },
-                                                {
-                                                    label: 'Not supported (array)',
-                                                    value: 'maxItems, uniqueItems, contains, minContains, maxContains, prefixItems, unevaluatedItems',
-                                                },
-                                                {
-                                                    label: 'Not supported (object)',
-                                                    value: 'minProperties, maxProperties, patternProperties, propertyNames, dependentRequired, dependentSchemas, unevaluatedProperties',
-                                                },
-                                                {
-                                                    label: 'minItems',
-                                                    value: 'Allowed only for arrays and must be 0 or 1',
-                                                },
-                                            ]}
-                                        />
-                                    </DocsCard>
+                                        <div className="grid gap-x-12 gap-y-10 sm:grid-cols-2">
+                                            <div className="space-y-3">
+                                                <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">Allowed</p>
+                                                <div className="flex flex-wrap gap-2 text-sm leading-relaxed text-slate-300">
+                                                    <code>type</code>, <code>properties</code>, <code>required</code>, <code>items</code>, <code>enum</code>, <code>const</code>, <code>format</code>, <code>pattern</code>, <code>anyOf</code>, <code>allOf</code>, <code>$ref</code>, <code>$defs</code>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-3">
+                                                <p className="text-[10px] font-bold uppercase tracking-widest text-rose-500">Not supported</p>
+                                                <div className="flex flex-wrap gap-2 text-sm leading-relaxed text-slate-400">
+                                                    <code>oneOf</code>, <code>not</code>, <code>if</code>, <code>then</code>, <code>else</code>, <code>minimum</code>, <code>maximum</code>, <code>minLength</code>, <code>maxLength</code>, <code>maxItems</code>, <code>uniqueItems</code>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                    <DocsCard variant="glass" size="md">
+                                    <div className="space-y-6">
                                         <DocsSectionHeader
                                             title="$ref and pattern rules"
+                                            titleClassName="!text-lg"
                                             description="Additional validation rules for references and regex patterns."
                                         />
                                         <DocsChecklist
-                                            className="mt-6"
                                             items={[
                                                 '$ref must be local (starts with #).',
                                                 'Recursive references are rejected.',
@@ -736,7 +744,7 @@ export default function ApiReference() {
                                                 'Quantifiers {n} or {n,m} are allowed only when n/m are 99 or less.',
                                             ]}
                                         />
-                                    </DocsCard>
+                                    </div>
                                 </div>
                             </section>
 
@@ -747,13 +755,12 @@ export default function ApiReference() {
                                 />
                                 <div className="mt-8 space-y-6">
                                     {endpointGroups.filter((g) => g.title === 'Agent profiles').map((group) => (
-                                        <DocsCard key={group.title} variant="deep" size="md">
-                                            <DocsEndpointGroup
-                                                title={group.title}
-                                                description={group.description}
-                                                endpoints={group.endpoints}
-                                            />
-                                        </DocsCard>
+                                        <DocsEndpointGroup
+                                            key={group.title}
+                                            title={group.title}
+                                            description={group.description}
+                                            endpoints={group.endpoints}
+                                        />
                                     ))}
                                 </div>
                                 <div className="mt-10 space-y-10">
@@ -798,13 +805,12 @@ export default function ApiReference() {
                                 />
                                 <div className="mt-8 space-y-6">
                                     {endpointGroups.filter((g) => g.title === 'Sessions').map((group) => (
-                                        <DocsCard key={group.title} variant="glass" size="md">
-                                            <DocsEndpointGroup
-                                                title={group.title}
-                                                description={group.description}
-                                                endpoints={group.endpoints}
-                                            />
-                                        </DocsCard>
+                                        <DocsEndpointGroup
+                                            key={group.title}
+                                            title={group.title}
+                                            description={group.description}
+                                            endpoints={group.endpoints}
+                                        />
                                     ))}
                                 </div>
                                 <div className="mt-10 space-y-8">
@@ -825,23 +831,28 @@ export default function ApiReference() {
                                         <DocsCodeBlock language="json" code={sessionValidationError} />
                                     </div>
                                 </div>
-                                <DocsKeyValueList
-                                    className="mt-10"
-                                    items={[
-                                        { label: 'transport', value: 'Required. webrtc or websocket.' },
-                                        { label: 'codec', value: 'Optional. Defaults to pcm16.' },
-                                        { label: 'WebRTC', value: 'codec must be pcm16.' },
-                                        { label: 'WebSocket', value: 'codec can be pcm16 or mulaw.' },
-                                    ]}
-                                />
-                                <DocsKeyValueList
-                                    className="mt-6"
-                                    items={[
-                                        { label: 'WebRTC input sample rate', value: 'Any value >= 16000 (not returned in response).' },
-                                        { label: 'ICE servers', value: 'Provisioned via Cloudflare TURN.' },
-                                        { label: 'WebSocket audio_format', value: 'pcm16: input 16000/output 48000; mulaw: input 8000/output 8000.' },
-                                    ]}
-                                />
+                                <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <h4 className="text-sm font-semibold text-emerald-400">transport</h4>
+                                        <p className="text-sm leading-relaxed text-slate-400">Required. <code className="text-emerald-400">webrtc</code> or <code className="text-emerald-400">websocket</code>.</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h4 className="text-sm font-semibold text-emerald-400">codec</h4>
+                                        <p className="text-sm leading-relaxed text-slate-400">Optional. Defaults to <code className="text-emerald-400">pcm16</code>. WebRTC requires <code className="text-emerald-400">pcm16</code>; WebSocket supports <code className="text-emerald-400">pcm16</code> or <code className="text-emerald-400">mulaw</code>.</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h4 className="text-sm font-semibold text-emerald-400">WebRTC input sample rate</h4>
+                                        <p className="text-sm leading-relaxed text-slate-400">Any value &gt;= 16000 (not returned in response).</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h4 className="text-sm font-semibold text-emerald-400">ICE servers</h4>
+                                        <p className="text-sm leading-relaxed text-slate-400">Provisioned via Cloudflare TURN.</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h4 className="text-sm font-semibold text-emerald-400">WebSocket audio_format</h4>
+                                        <p className="text-sm leading-relaxed text-slate-400"><code className="text-emerald-400">pcm16</code>: input 16000/output 48000; <code className="text-emerald-400">mulaw</code>: input 8000/output 8000.</p>
+                                    </div>
+                                </div>
                             </section>
 
                             <section id="websocket" className="scroll-mt-32">
@@ -858,13 +869,20 @@ export default function ApiReference() {
                                         <DocsBadge tone="emerald">Server ACK</DocsBadge>
                                         <DocsCodeBlock language="json" code={websocketAck} />
                                     </div>
-                                    <DocsKeyValueList
-                                        items={[
-                                            { label: 'Inbound audio', value: '16 kHz mono PCM16 little-endian (20ms chunks recommended).' },
-                                            { label: 'Outbound audio (pcm16)', value: 'Raw PCM16 frames at 48 kHz.' },
-                                            { label: 'Outbound audio (mulaw)', value: 'Mulaw frames at 8 kHz.' },
-                                        ]}
-                                    />
+                                    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+                                        <div className="space-y-2">
+                                            <h4 className="text-sm font-semibold text-emerald-400">Inbound audio</h4>
+                                            <p className="text-sm leading-relaxed text-slate-400">16 kHz mono PCM16 little-endian (20ms chunks recommended).</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <h4 className="text-sm font-semibold text-emerald-400">Outbound audio (pcm16)</h4>
+                                            <p className="text-sm leading-relaxed text-slate-400">Raw PCM16 frames at 48 kHz.</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <h4 className="text-sm font-semibold text-emerald-400">Outbound audio (mulaw)</h4>
+                                            <p className="text-sm leading-relaxed text-slate-400">Mulaw frames at 8 kHz.</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </section>
 
@@ -900,9 +918,10 @@ export default function ApiReference() {
                                     description="Use WebSocket signaling (preferred) or HTTP polling as a fallback."
                                 />
                                 <div className="mt-8 space-y-10">
-                                    <DocsCard variant="deep" size="md">
+                                    <div className="space-y-8">
                                         <DocsSectionHeader
                                             title="A) WebSocket signaling"
+                                            titleClassName="!text-lg"
                                             description="Endpoint: wss://<cluster_slug>.resona.dev/webrtc/signal"
                                         />
                                         <div className="mt-6 space-y-6">
@@ -936,11 +955,12 @@ export default function ApiReference() {
                                                 ]}
                                             />
                                         </div>
-                                    </DocsCard>
+                                    </div>
 
-                                    <DocsCard variant="deep" size="md">
+                                    <div className="space-y-8">
                                         <DocsSectionHeader
                                             title="B) HTTP polling"
+                                            titleClassName="!text-lg"
                                             description="Endpoint: https://<cluster_slug>.resona.dev/webrtc/candidates"
                                         />
                                         <div className="mt-6 space-y-6">
@@ -962,7 +982,7 @@ export default function ApiReference() {
                                                 ]}
                                             />
                                         </div>
-                                    </DocsCard>
+                                    </div>
                                 </div>
                             </section>
 
@@ -1002,22 +1022,19 @@ export default function ApiReference() {
                                         'Large tool responses are truncated to 1500 characters internally.',
                                     ]}
                                 />
-                                <DocsKeyValueList
-                                    className="mt-8"
-                                    items={[
-                                        { label: 'Data channel', value: 'Label: events, ordered: true' },
-                                    ]}
-                                />
+                                <div className="mt-8">
+                                    <div className="space-y-2">
+                                        <h4 className="text-sm font-semibold text-emerald-400">Data channel</h4>
+                                        <p className="text-sm leading-relaxed text-slate-400"><code className="text-emerald-400">Label: events</code>, <code className="text-emerald-400">ordered: true</code></p>
+                                    </div>
+                                </div>
                             </section>
 
                             <section id="errors" className="scroll-mt-32">
                                 <DocsSectionHeader
                                     title="Error Events"
-                                    description="Error events are terminal and the socket is closed immediately after they are sent."
+                                    description="Error events are terminal and the socket is closed immediately after they are sent. session_id and timestamp may be omitted for handshake errors."
                                 />
-                                <p className="mt-4 text-sm text-slate-400">
-                                    session_id and timestamp may be omitted for handshake errors.
-                                </p>
                                 <div className="mt-8 space-y-6">
                                     <DocsCodeBlock language="json" code={errorInvalidHandshake} />
                                     <DocsCodeBlock language="json" code={errorInvalidToken} />
@@ -1040,6 +1057,7 @@ export default function ApiReference() {
                                         rows={[
                                             ['Profile name', '2-48 characters, unique per user'],
                                             ['System instructions', '7,500 characters'],
+                                            ['Session duration', 'Up to 120 minutes (2 hours)'],
                                             ['Tools per profile', '15 max'],
                                             ['Tools JSON size', '7,500 characters (minified)'],
                                             ['Optional tool parameters', '24 max across all tools'],
