@@ -13,22 +13,22 @@ type DocsCardProps = {
 };
 
 const variantClasses: Record<DocsCardVariant, string> = {
-    glass: 'bg-white/5',
-    muted: 'bg-slate-900/40',
-    deep: 'bg-slate-950/60',
-    gradient: 'bg-gradient-to-br from-slate-900/60 to-slate-950/90',
-    accent: 'bg-gradient-to-br from-emerald-500/15 to-cyan-500/10',
+    glass: 'bg-slate-900/40 backdrop-blur-sm border-white/10 hover:border-white/20',
+    muted: 'bg-slate-950/20 border-white/5 hover:border-white/10',
+    deep: 'bg-slate-950 border-white/10 shadow-xl',
+    gradient: 'bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 border-white/10',
+    accent: 'bg-slate-900/50 border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.05)]',
 };
 
 const radiusClasses: Record<DocsCardRadius, string> = {
-    lg: 'rounded-2xl',
-    xl: 'rounded-3xl',
+    lg: 'rounded-xl',
+    xl: 'rounded-2xl',
 };
 
 const sizeClasses: Record<DocsCardSize, string> = {
-    sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8',
+    sm: 'p-5',
+    md: 'p-8',
+    lg: 'p-12',
 };
 
 function classes(...values: Array<string | undefined>): string {
@@ -45,14 +45,17 @@ export default function DocsCard({
     return (
         <div
             className={classes(
-                'border border-white/10',
+                'group relative border transition-all duration-300',
                 variantClasses[variant],
                 radiusClasses[radius],
                 sizeClasses[size],
                 className,
             )}
         >
-            {children}
+            {variant === 'accent' && (
+                <div className="absolute -inset-px rounded-[inherit] bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 opacity-0 transition-opacity group-hover:opacity-100" />
+            )}
+            <div className="relative z-10">{children}</div>
         </div>
     );
 }

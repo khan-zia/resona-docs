@@ -12,3 +12,4 @@ export { default as DocsPageShell } from './DocsPageShell';
 export { default as DocsSectionHeader } from './DocsSectionHeader';
 export { default as DocsStatCard } from './DocsStatCard';
 export { default as DocsStepCard } from './DocsStepCard';
+export { default as DocsTable } from './DocsTable';

@@ -22,18 +22,18 @@ export default function DocsSectionHeader({
     descriptionClassName,
 }: DocsSectionHeaderProps) {
     return (
-        <div className={classes('flex flex-col gap-4', className)}>
+        <div className={classes('flex flex-col gap-5', className)}>
             {eyebrow}
             <h2
                 className={classes(
-                    'font-[family:var(--font-display)] text-2xl font-semibold text-white',
+                    'font-display text-2xl font-bold tracking-tight text-white sm:text-3xl',
                     titleClassName,
                 )}
             >
                 {title}
             </h2>
             {description ? (
-                <p className={classes('text-sm text-slate-300', descriptionClassName)}>{description}</p>
+                <p className={classes('max-w-3xl text-[15px] leading-relaxed text-slate-400', descriptionClassName)}>{description}</p>
             ) : null}
         </div>
     );

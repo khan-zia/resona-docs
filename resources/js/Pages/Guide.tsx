@@ -9,543 +9,365 @@ import {
     DocsKeyValueList,
     DocsPageShell,
     DocsSectionHeader,
+    DocsStatCard,
     DocsStepCard,
 } from '../components/docs';
+import classes from '../utils/classes';
+import { useState } from 'react';
 
 const guideNav = [
     { id: 'quickstart', label: 'Quickstart' },
-    { id: 'authentication', label: 'Authentication' },
-    { id: 'agent-profiles', label: 'Agent profiles' },
-    { id: 'start-session', label: 'Start a session' },
-    { id: 'webrtc', label: 'WebRTC sessions' },
-    { id: 'websocket', label: 'WebSocket sessions' },
-    { id: 'events-tools', label: 'Events & tool calls' },
-    { id: 'audio-formats', label: 'Audio formats' },
-    { id: 'webhooks', label: 'Webhooks' },
-    { id: 'limits-retries', label: 'Limits & retries' },
+    { id: 'base-urls', label: 'Base URLs' },
+    { id: 'auth', label: 'Authentication' },
+    { id: 'agent-profiles', label: 'Agent Profiles' },
+    { id: 'tools-json', label: 'Tools JSON Rules' },
+    { id: 'sessions', label: 'Create Session' },
+    { id: 'webrtc', label: 'WebRTC Integration' },
+    { id: 'websocket', label: 'WebSocket Integration' },
+    { id: 'events', label: 'Events & Tool Calls' },
+    { id: 'errors-limits', label: 'Errors & Limits' },
 ];
 
 const quickstartSteps = [
     {
-        title: 'Create an API key',
-        body: 'Generate a key in the Resona dashboard and store it in your backend.',
-    },
-    {
         title: 'Create an agent profile',
-        body: 'Define instructions, a voice, and tools that your agent can call.',
+        body: 'Define instructions, tools, and a voice by name (case-insensitive).',
     },
     {
         title: 'Start a session',
-        body: 'Request a session token and realtime URL for WebRTC or WebSocket.',
+        body: 'Request a session with transport = webrtc or websocket.',
     },
     {
-        title: 'Stream audio + events',
-        body: 'Send audio frames and respond to tool calls as they arrive.',
+        title: 'Connect to realtime',
+        body: 'Use the returned cluster_base_url for WebRTC or WebSocket.',
+    },
+    {
+        title: 'Handle events + tools',
+        body: 'Listen for token/tool events and reply with tool.result.',
     },
 ];
 
-const productionChecklist = [
-    'Keep API keys on the server; never ship them to browsers.',
-    'Use the session token + cluster URL from the session response for realtime connections.',
-    'Handle tool.call events and reply with tool.result within the same session.',
-    'Reconnect by creating a new session after errors or timeouts.',
-];
-
-const createAgentProfileCurl = String.raw`curl -X POST https://api.resona.ai/v1/agent-profiles \
-  -H "Authorization: Bearer $RESONA_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Concierge",
-    "voice_id": 12,
-    "system_instructions": "You are a helpful concierge for hotel bookings.",
-    "agent_speaks_first": true,
-    "tools_json": [
-      {
-        "name": "lookup_booking",
-        "description": "Find a booking by confirmation code.",
-        "input_schema": {
-          "type": "object",
-          "properties": {
-            "confirmation_code": { "type": "string" }
-          },
-          "required": ["confirmation_code"]
+const createProfileRequest = String.raw`{
+    "name": "Dental Concierge",
+    "voice": "Grant",
+    "system_instructions": "Be concise and confirm appointment details.",
+    "domain_context": {
+        "context": {
+            "text": "This agent books dental appointments.",
+            "general": [
+                { "key": "Business", "value": "Bright Dental" },
+                { "key": "Timezone", "value": "America/Los_Angeles" }
+            ],
+            "terms": ["checkup", "cleaning", "crown"]
         }
-      }
+    },
+    "agent_speaks_first": false,
+    "tools_json": [
+        {
+            "name": "lookup_customer",
+            "description": "Find a customer by phone number",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "phone": { "type": "string" }
+                },
+                "required": ["phone"],
+                "additionalProperties": false
+            }
+        }
     ]
-  }'`;
+}`;
 
-const createSessionCurl = String.raw`curl -X POST https://api.resona.ai/v1/sessions \
-  -H "Authorization: Bearer $RESONA_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "agent_id": "agent-8fef6f3c-2f1a-4e5c-b4d6-6d1c9f36a4a1",
+const createSessionRequest = String.raw`{
+    "agent_id": "agent-3e6f2a41-0f6b-4c4b-a4d5-9e2a4b1e2a3c",
     "transport": "webrtc",
     "codec": "pcm16"
-  }'`;
+}`;
 
-const sessionResponseJson = String.raw`{
-  "session_id": "session-5bda2f14-6b7a-4a67-9c75-9bde3f03e2df",
-  "token": "session_token_...",
-  "expires_at": "2026-01-22T20:12:11Z",
-  "transport": "webrtc",
-  "webrtc_url": "https://realtime.resona.ai/webrtc/sdp",
-  "websocket_url": null,
-  "cluster_slug": "shared",
-  "cluster_base_url": "https://realtime.resona.ai",
-  "audio_format": {
-    "output_codec": "opus",
-    "output_sample_rate": 48000
-  },
-  "ice_servers": [
-    {
-      "urls": ["stun:stun.cloudflare.com:3478"],
-      "username": "resona",
-      "credential": "..."
+const webrtcSessionResponse = String.raw`{
+    "session_id": "session-8f8d9e2a-5b5a-4c6a-91f2-0f813ea5c3df",
+    "token": "tkn_1f9b3a7c9d4e8b2a5c7d9e1f3a5b7c9d",
+    "expires_at": "2026-01-22T16:04:39.000Z",
+    "transport": "webrtc",
+    "webrtc_url": "https://us-east.resona.dev/webrtc/sdp",
+    "websocket_url": null,
+    "cluster_slug": "us-east",
+    "cluster_base_url": "https://us-east.resona.dev",
+    "audio_format": {
+        "input_codec": "pcm16",
+        "output_codec": "opus",
+        "output_sample_rate": 48000
+    },
+    "ice_servers": [
+        {
+            "urls": ["turn:turn.cloudflare.com:3478?transport=udp"],
+            "username": "1705937079:tenant-42",
+            "credential": "9f4a2b0f2f4b4a7f8a3b1eaf9a6f1d2e"
+        }
+    ]
+}`;
+
+const websocketSessionResponse = String.raw`{
+    "session_id": "session-3a5d2e71-0d1f-4bd7-a0d1-8f3e6f2f0a91",
+    "token": "tkn_9d12b7a3c9f8e1d4b5a6c7e8f9a0b1c2",
+    "expires_at": "2026-01-22T16:09:12.000Z",
+    "transport": "websocket",
+    "webrtc_url": null,
+    "websocket_url": "https://us-east.resona.dev/ws/audio",
+    "cluster_slug": "us-east",
+    "cluster_base_url": "https://us-east.resona.dev",
+    "audio_format": {
+        "input_codec": "pcm16",
+        "input_sample_rate": 16000,
+        "output_codec": "pcm16",
+        "output_sample_rate": 48000
     }
-  ]
 }`;
 
-const webrtcSnippet = String.raw`const session = await fetch('/v1/sessions', {
-  method: 'POST',
-  headers: {
-    Authorization: 'Bearer ' + apiKey,
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({ agent_id: agentId, transport: 'webrtc', codec: 'pcm16' }),
-}).then((res) => res.json());
-
-const pc = new RTCPeerConnection({ iceServers: session.ice_servers });
-const events = pc.createDataChannel('events');
-
-events.onmessage = (event) => {
-  const payload = JSON.parse(event.data);
-  handleRealtimeEvent(payload);
-};
-
-pc.onicecandidate = async (event) => {
-  if (!event.candidate) {
-    await fetch(session.cluster_base_url + '/webrtc/candidates', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        session_id: session.session_id,
-        token: session.token,
-        complete: true,
-      }),
-    });
-    return;
-  }
-
-  await fetch(session.cluster_base_url + '/webrtc/candidates', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      session_id: session.session_id,
-      token: session.token,
-      candidates: [event.candidate],
-    }),
-  });
-};
-
-const media = await navigator.mediaDevices.getUserMedia({ audio: true });
-media.getTracks().forEach((track) => pc.addTrack(track, media));
-
-const offer = await pc.createOffer();
-await pc.setLocalDescription(offer);
-
-const sdpAnswer = await fetch(session.webrtc_url, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    session_id: session.session_id,
-    token: session.token,
-    sdp_offer: offer.sdp,
-  }),
-}).then((res) => res.json());
-
-await pc.setRemoteDescription({ type: 'answer', sdp: sdpAnswer.sdp_answer });`;
-
-const websocketSnippet = String.raw`const session = await fetch('/v1/sessions', {
-  method: 'POST',
-  headers: {
-    Authorization: 'Bearer ' + apiKey,
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({ agent_id: agentId, transport: 'websocket', codec: 'pcm16' }),
-}).then((res) => res.json());
-
-const ws = new WebSocket(session.websocket_url);
-ws.binaryType = 'arraybuffer';
-
-ws.onopen = () => {
-  ws.send(
-    JSON.stringify({
-      type: 'handshake',
-      session_id: session.session_id,
-      token: session.token,
-      codec: 'pcm16',
-    }),
-  );
-};
-
-ws.onmessage = (event) => {
-  if (typeof event.data === 'string') {
-    const payload = JSON.parse(event.data);
-    handleRealtimeEvent(payload);
-  }
-};
-
-function sendPcmFrame(frame) {
-  ws.send(frame);
-}
-
-function sendToolResult(toolUseId, response) {
-  ws.send(
-    JSON.stringify({
-      type: 'tool.result',
-      session_id: session.session_id,
-      timestamp: new Date().toISOString(),
-      payload: {
-        tool_use_id: toolUseId,
-        response,
-      },
-    }),
-  );
-}`;
-
-const tokenEventExample = String.raw`{
-  "type": "token",
-  "tokens": [
-    { "text": "Hello!", "isFinal": true, "speaker": "assistant" }
-  ]
-}`;
-
-const toolCallExample = String.raw`{
-  "type": "tool.call",
-  "session_id": "session-...",
-  "timestamp": "2026-01-22T18:12:04Z",
-  "payload": {
-    "tool_use_id": "tool_1",
-    "name": "lookup_booking",
-    "arguments": { "confirmation_code": "ABC123" }
-  }
-}`;
-
-const toolResultExample = String.raw`{
-  "type": "tool.result",
-  "session_id": "session-...",
-  "timestamp": "2026-01-22T18:12:07Z",
-  "payload": {
-    "tool_use_id": "tool_1",
-    "response": { "status": "confirmed", "room": "Deluxe" }
-  }
-}`;
-
-const toolStatusExample = String.raw`{
-  "type": "tool.status",
-  "session_id": "session-...",
-  "timestamp": "2026-01-22T18:12:05Z",
-  "payload": {
-    "tool_use_id": "tool_1",
-    "status": "running",
-    "summary": "Looking up booking"
-  }
-}`;
-
-const errorExample = String.raw`{
-  "type": "error",
-  "code": "limit_exceeded",
-  "message": "Concurrent session limit exceeded for tenant"
-}`;
-
-const webhookPayloadExample = String.raw`{
-  "session_id": "session-5bda2f14-6b7a-4a67-9c75-9bde3f03e2df",
-  "transport": "webrtc",
-  "status": "finished",
-  "reason": "completed",
-  "started_at": "2026-01-22T18:12:01Z",
-  "ended_at": "2026-01-22T18:15:44Z",
-  "metrics": {
-    "duration_ms": 223000
-  },
-  "transcript": [
-    { "speaker": "user", "text": "I need a booking." },
-    { "speaker": "assistant", "text": "Happy to help." }
-  ],
-  "tool_calls": [],
-  "events": { "counts": { "token": 42 }, "lastEventAt": "2026-01-22T18:15:44Z" },
-  "audio": { "codec": "pcm16", "sample_rate": 16000, "channel_count": 1 },
-  "metadata": { "user_id": 991 }
-}`;
-
-const webhookVerifyExample = String.raw`import crypto from 'crypto';
-
-const signature = req.headers['x-resona-signature'];
-const payload = req.rawBody; // ensure this is the unmodified raw body
-
-const expected = crypto
-  .createHmac('sha256', process.env.RESONA_WEBHOOK_SECRET)
-  .update(payload)
-  .digest('hex');
-
-if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
-  throw new Error('Invalid signature');
+const websocketHandshake = String.raw`{
+    "type": "handshake",
+    "session_id": "session-3a5d2e71-0d1f-4bd7-a0d1-8f3e6f2f0a91",
+    "token": "tkn_9d12b7a3c9f8e1d4b5a6c7e8f9a0b1c2",
+    "codec": "pcm16"
 }`;
 
 export default function Guide() {
+    const [activeSection, setActiveSection] = useState('quickstart');
+
     return (
         <>
             <Head title="Guide" />
             <DocsLayout
-                title="Guide"
-                subtitle="A customer-focused guide to building voice experiences with Resona — from first request to production launch."
+                title="Integration Guide"
+                subtitle="Build professional voice experiences with Resona - from first request to production launch."
                 active="guide"
             >
                 <DocsPageShell
                     nav={
-                        <DocsCard variant="deep" size="sm" className="flex flex-col gap-4">
-                            <div className="text-xs uppercase tracking-[0.3em] text-emerald-200">On this page</div>
-                            <div className="flex flex-col gap-3 text-sm text-slate-300">
-                                {guideNav.map((item) => (
-                                    <a
-                                        key={item.id}
-                                        href={`#${item.id}`}
-                                        className="rounded-lg px-2 py-1 transition hover:bg-white/5 hover:text-white"
-                                    >
-                                        {item.label}
-                                    </a>
-                                ))}
-                            </div>
-                        </DocsCard>
+                        <div className="flex flex-col gap-1">
+                            {guideNav.map((item) => (
+                                <a
+                                    key={item.id}
+                                    href={`#${item.id}`}
+                                    className={classes(
+                                        'rounded-lg px-2 py-1.5 text-sm font-medium transition',
+                                        activeSection === item.id
+                                            ? 'bg-white/10 text-white'
+                                            : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                                    )}
+                                >
+                                    {item.label}
+                                </a>
+                            ))}
+                        </div>
                     }
-                    navClassName="lg:sticky lg:top-28 h-max"
+                    onSectionChange={setActiveSection}
+                    aside={null}
                     main={
-                        <>
-                            <section id="quickstart" className="scroll-mt-28">
-                                <DocsCard variant="glass" size="lg">
-                                    <DocsSectionHeader
-                                        eyebrow={<DocsEyebrow>Quickstart</DocsEyebrow>}
-                                        title="Ship a Resona voice experience in one afternoon."
-                                        description="You only need an API key, an agent profile, and a session token to start streaming audio."
-                                    />
-                                    <div className="mt-8 grid gap-6 md:grid-cols-2">
-                                        {quickstartSteps.map((step, index) => (
-                                            <DocsStepCard
-                                                key={step.title}
-                                                index={index + 1}
-                                                title={step.title}
-                                                body={step.body}
-                                            />
-                                        ))}
-                                    </div>
-                                    <div className="mt-8 grid gap-4 md:grid-cols-2">
-                                        <DocsCodeBlock code={createAgentProfileCurl} language="bash" />
-                                        <DocsCodeBlock code={createSessionCurl} language="bash" />
-                                    </div>
-                                </DocsCard>
-                            </section>
-
-                            <section id="authentication" className="scroll-mt-28">
-                                <DocsCard variant="muted" size="lg">
-                                    <DocsSectionHeader
-                                        eyebrow={<DocsEyebrow>Authentication</DocsEyebrow>}
-                                        title="Secure every request with a Bearer API key."
-                                        description="Keep API keys on your server. The browser should only receive session tokens returned by the session endpoint."
-                                    />
-                                    <DocsCodeBlock
-                                        className="mt-6"
-                                        language="bash"
-                                        code={String.raw`Authorization: Bearer resona_live_********`}
-                                    />
-                                </DocsCard>
-                            </section>
-
-                            <section id="agent-profiles" className="scroll-mt-28">
-                                <DocsCard variant="deep" size="lg">
-                                    <DocsSectionHeader
-                                        eyebrow={<DocsEyebrow>Agent profiles</DocsEyebrow>}
-                                        title="Define the agent your customers will hear."
-                                        description="Profiles bundle instructions, a voice, and optional tools. Reuse a profile across many sessions."
-                                    />
-                                    <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-                                        <DocsCodeBlock language="bash" code={createAgentProfileCurl} />
-                                        <div className="flex flex-col gap-4 text-sm text-slate-300">
-                                            <p>
-                                                <span className="font-semibold text-white">Required:</span> name,
-                                                tools_json.
-                                            </p>
-                                            <p>
-                                                <span className="font-semibold text-white">Optional:</span> voice_id,
-                                                system_instructions, domain_context, agent_speaks_first.
-                                            </p>
-                                            <p>
-                                                Tool schemas accept JSON Schema objects. You can supply either
-                                                <span className="font-semibold text-white"> input_schema</span> or
-                                                <span className="font-semibold text-white"> parameters</span>.
-                                            </p>
-                                            <p>
-                                                Limits: max 15 tools per profile, tool names must match
-                                                <span className="font-mono text-slate-200"> /[a-zA-Z0-9_-]{1,64}/</span>.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </DocsCard>
-                            </section>
-
-                            <section id="start-session" className="scroll-mt-28">
-                                <DocsCard variant="glass" size="lg">
-                                    <DocsSectionHeader
-                                        eyebrow={<DocsEyebrow>Sessions</DocsEyebrow>}
-                                        title="Create a session to receive realtime credentials."
-                                        description="A session returns a short-lived token and a cluster URL. Use those values for every realtime connection."
-                                    />
-                                    <div className="mt-6 grid gap-4 lg:grid-cols-2">
-                                        <DocsCodeBlock language="bash" code={createSessionCurl} />
-                                        <DocsCodeBlock language="json" code={sessionResponseJson} />
-                                    </div>
-                                </DocsCard>
-                            </section>
-
-                            <section id="webrtc" className="scroll-mt-28">
-                                <DocsCard variant="muted" size="lg">
-                                    <DocsSectionHeader
-                                        eyebrow={<DocsEyebrow>WebRTC</DocsEyebrow>}
-                                        title="Best for low-latency browser experiences."
-                                        description="Use the WebRTC transport when you can use a microphone and data channel in the browser."
-                                    />
-                                    <div className="mt-6 flex flex-col gap-4 text-sm text-slate-300">
-                                        <p>
-                                            1. Create an RTCPeerConnection with <span className="font-semibold text-white">ice_servers</span>.
-                                        </p>
-                                        <p>
-                                            2. Create a data channel named <span className="font-mono text-slate-200">events</span> for JSON events.
-                                        </p>
-                                        <p>
-                                            3. Send your SDP offer to <span className="font-mono text-slate-200">webrtc_url</span> with the session token.
-                                        </p>
-                                        <p>4. Exchange ICE candidates via <span className="font-mono text-slate-200">/webrtc/candidates</span> or the signaling WS.</p>
-                                    </div>
-                                    <DocsCodeBlock className="mt-6" language="typescript" code={webrtcSnippet} />
-                                </DocsCard>
-                            </section>
-
-                            <section id="websocket" className="scroll-mt-28">
-                                <DocsCard variant="deep" size="lg">
-                                    <DocsSectionHeader
-                                        eyebrow={<DocsEyebrow>WebSocket</DocsEyebrow>}
-                                        title="Use WebSocket when WebRTC is not an option."
-                                        description="Send raw audio frames over the socket and receive events as JSON messages."
-                                    />
-                                    <div className="mt-6 flex flex-col gap-4 text-sm text-slate-300">
-                                        <p>
-                                            Send a JSON handshake immediately after opening the socket. After the <span className="font-mono text-slate-200">ack</span>,
-                                            stream raw audio frames as binary messages.
-                                        </p>
-                                    </div>
-                                    <DocsCodeBlock className="mt-6" language="typescript" code={websocketSnippet} />
-                                </DocsCard>
-                            </section>
-
-                            <section id="events-tools" className="scroll-mt-28">
-                                <DocsCard variant="glass" size="lg">
-                                    <DocsSectionHeader
-                                        eyebrow={<DocsEyebrow>Events & tools</DocsEyebrow>}
-                                        title="Listen for events and respond to tool calls." 
-                                        description="Events are JSON envelopes delivered over the WebRTC data channel or the WebSocket connection."
-                                    />
-                                    <div className="mt-6 grid gap-4 md:grid-cols-2">
-                                        <DocsCodeBlock language="json" code={tokenEventExample} />
-                                        <DocsCodeBlock language="json" code={toolCallExample} />
-                                        <DocsCodeBlock language="json" code={toolResultExample} />
-                                        <DocsCodeBlock language="json" code={toolStatusExample} />
-                                    </div>
-                                    <div className="mt-6">
-                                        <DocsCodeBlock language="json" code={errorExample} />
-                                    </div>
-                                    <div className="mt-6 text-sm text-slate-300">
-                                        <p>
-                                            When you receive <span className="font-semibold text-white">tool.call</span>, invoke the tool in your system and reply
-                                            with <span className="font-semibold text-white">tool.result</span> using the same <span className="font-mono text-slate-200">tool_use_id</span>.
-                                        </p>
-                                    </div>
-                                </DocsCard>
-                            </section>
-
-                            <section id="audio-formats" className="scroll-mt-28">
-                                <DocsCard variant="muted" size="lg">
-                                    <DocsSectionHeader
-                                        eyebrow={<DocsEyebrow>Audio formats</DocsEyebrow>}
-                                        title="Match your codec and sample rate to the session." 
-                                        description="The session response includes an audio_format object. Use it as the source of truth."
-                                    />
-                                    <div className="mt-6 grid gap-6 md:grid-cols-2">
-                                        <DocsKeyValueList
-                                            items={[
-                                                { label: 'WebRTC output', value: 'Opus @ 48kHz' },
-                                                { label: 'WebRTC input', value: 'PCM16 (handled via WebRTC)' },
-                                                { label: 'WebSocket PCM16 input', value: '16kHz, mono, little-endian' },
-                                                { label: 'WebSocket PCM16 output', value: '48kHz, mono, little-endian' },
-                                                { label: 'WebSocket µ-law input/output', value: '8kHz, mono' },
-                                            ]}
+                        <div className="max-w-4xl space-y-24">
+                            <section id="quickstart" className="scroll-mt-32">
+                                <DocsSectionHeader
+                                    eyebrow={<DocsEyebrow>Quickstart</DocsEyebrow>}
+                                    title="Ship in an afternoon."
+                                    description="Create a profile, start a session, and stream audio over WebRTC or WebSocket."
+                                />
+                                <div className="mt-12 grid gap-6 sm:grid-cols-2">
+                                    {quickstartSteps.map((step, index) => (
+                                        <DocsStepCard
+                                            key={step.title}
+                                            index={index + 1}
+                                            title={step.title}
+                                            body={step.body}
                                         />
-                                        <div className="text-sm text-slate-300">
-                                            <p>
-                                                Use <span className="font-semibold text-white">pcm16</span> for higher fidelity. Use
-                                                <span className="font-semibold text-white"> mulaw</span> for telephony integrations.
-                                            </p>
-                                            <p className="mt-4">
-                                                WebRTC sessions always negotiate PCM16 internally and return Opus audio to the browser.
-                                            </p>
-                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+
+                            <section id="base-urls" className="scroll-mt-32">
+                                <DocsSectionHeader
+                                    eyebrow={<DocsEyebrow>Production</DocsEyebrow>}
+                                    title="Base URLs"
+                                    description="Resona separates the control plane from realtime clusters. Always use the cluster_base_url returned by session creation."
+                                />
+                                <div className="mt-8 flex flex-col gap-6">
+                                    <DocsStatCard
+                                        label="Control Plane"
+                                        value="https://resona.dev"
+                                        caption="REST API for profiles and sessions"
+                                    />
+                                    <DocsStatCard
+                                        label="Realtime"
+                                        value="https://<cluster_slug>.resona.dev"
+                                        caption="Use cluster_base_url from session response"
+                                    />
+                                </div>
+                            </section>
+
+                            <section id="auth" className="scroll-mt-32">
+                                <DocsCard variant="accent" size="md">
+                                    <div className="space-y-6">
+                                        <DocsSectionHeader
+                                            eyebrow={<DocsEyebrow tone="accent">Security</DocsEyebrow>}
+                                            title="Authentication"
+                                            description="All REST requests include your secret API key in the Authorization header."
+                                        />
+                                        <DocsCodeBlock language="bash" code={String.raw`Authorization: Bearer <api_key>`} />
                                     </div>
                                 </DocsCard>
                             </section>
 
-                            <section id="webhooks" className="scroll-mt-28">
+                            <section id="agent-profiles" className="scroll-mt-32">
+                                <DocsSectionHeader
+                                    eyebrow={<DocsEyebrow>Foundation</DocsEyebrow>}
+                                    title="Agent Profiles"
+                                    description="Profiles bundle system instructions, tools, and voice settings. Voice names are case-insensitive."
+                                />
+                                <div className="mt-8 space-y-6">
+                                    <DocsKeyValueList
+                                        items={[
+                                            { label: 'Voice', value: 'Use the voice name (e.g., Grant), case-insensitive.' },
+                                            { label: 'Domain context', value: 'Optional structured context for business facts.' },
+                                            { label: 'Tools', value: 'Provide strict JSON Schema for tool calls.' },
+                                            { label: 'Agent speaks first', value: 'Boolean flag for greeting behavior.' },
+                                        ]}
+                                    />
+                                    <div className="space-y-4">
+                                        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Create Profile (Request)</p>
+                                        <DocsCodeBlock language="json" code={createProfileRequest} />
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section id="tools-json" className="scroll-mt-32">
                                 <DocsCard variant="deep" size="lg">
                                     <DocsSectionHeader
-                                        eyebrow={<DocsEyebrow>Webhooks</DocsEyebrow>}
-                                        title="Get a summary when sessions finish." 
-                                        description="Configure a webhook URL in the dashboard to receive session completion payloads."
-                                    />
-                                    <div className="mt-6 grid gap-4 lg:grid-cols-2">
-                                        <DocsCodeBlock language="json" code={webhookPayloadExample} />
-                                        <DocsCodeBlock language="typescript" code={webhookVerifyExample} />
-                                    </div>
-                                </DocsCard>
-                            </section>
-
-                            <section id="limits-retries" className="scroll-mt-28">
-                                <DocsCard variant="glass" size="lg">
-                                    <DocsSectionHeader
-                                        eyebrow={<DocsEyebrow>Limits & retries</DocsEyebrow>}
-                                        title="Design for limits, timeouts, and reconnects." 
-                                        description="Your plan defines concurrency, and sessions expire automatically."
+                                        title="Tools JSON Rules"
+                                        description="Tools are validated strictly. Keep schemas small, explicit, and consistent."
                                     />
                                     <DocsChecklist
                                         items={[
-                                            'Session creation is rate-limited; back off on HTTP 429 responses.',
-                                            'Maximum session duration is 2 hours. Create a new session to continue.',
-                                            'If you receive error events, create a fresh session and reconnect.',
-                                            'Use webhook retries and idempotent handlers to handle delivery retries.',
+                                            'Max 15 tools per profile; tools_json size must be 7,500 chars or less (minified).',
+                                            'Provide input_schema or parameters for every tool, not both, and keep it consistent across all tools.',
+                                            'Every object schema must include additionalProperties: false.',
+                                            'Optional parameters across all tools cannot exceed 24.',
+                                            'Max JSON Schema nesting depth is 5 levels.',
                                         ]}
+                                        className="mt-8"
                                     />
-                                    <div className="mt-6 flex flex-wrap gap-2">
-                                        <DocsBadge tone="emerald">429 Too Many Requests</DocsBadge>
-                                        <DocsBadge tone="cyan">402 Usage Limit Reached</DocsBadge>
-                                        <DocsBadge tone="slate">401 Unauthorized</DocsBadge>
-                                    </div>
+                                    <p className="mt-6 text-xs text-slate-500">
+                                        Full validation rules, supported keywords, and format lists are documented in the API Reference.
+                                    </p>
                                 </DocsCard>
                             </section>
 
-                            <DocsCard variant="accent" size="lg">
+                            <section id="sessions" className="scroll-mt-32">
                                 <DocsSectionHeader
-                                    eyebrow={<DocsEyebrow tone="accent">Production checklist</DocsEyebrow>}
-                                    title="Go live with confidence."
+                                    eyebrow={<DocsEyebrow>Realtime</DocsEyebrow>}
+                                    title="Create a Session"
+                                    description="Sessions are short-lived credentials tied to a specific transport and cluster."
                                 />
-                                <DocsChecklist items={productionChecklist} />
-                            </DocsCard>
-                        </>
+                                <div className="mt-8 space-y-6">
+                                    <div className="space-y-4">
+                                        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Create Session (Request)</p>
+                                        <DocsCodeBlock language="json" code={createSessionRequest} />
+                                    </div>
+                                    <DocsCard variant="glass" size="md">
+                                        <div className="space-y-4">
+                                            <DocsBadge tone="emerald">WebRTC Response</DocsBadge>
+                                            <DocsCodeBlock language="json" code={webrtcSessionResponse} />
+                                        </div>
+                                    </DocsCard>
+                                    <DocsCard variant="glass" size="md">
+                                        <div className="space-y-4">
+                                            <DocsBadge tone="cyan">WebSocket Response</DocsBadge>
+                                            <DocsCodeBlock language="json" code={websocketSessionResponse} />
+                                        </div>
+                                    </DocsCard>
+                                </div>
+                            </section>
+
+                            <section id="webrtc" className="scroll-mt-32">
+                                <DocsSectionHeader
+                                    eyebrow={<DocsEyebrow>Transport</DocsEyebrow>}
+                                    title="WebRTC Integration"
+                                    description="Use WebRTC for low-latency audio plus a data channel for events."
+                                />
+                                <DocsChecklist
+                                    items={[
+                                        'Create a session with transport = webrtc and codec = pcm16.',
+                                        'Create RTCPeerConnection using ice_servers from session response.',
+                                        'Add microphone track and create data channel named events.',
+                                        'POST SDP offer to webrtc_url, apply sdp_answer.',
+                                        'Exchange ICE candidates using /webrtc/signal (preferred) or /webrtc/candidates.',
+                                    ]}
+                                    className="mt-8"
+                                />
+                                <p className="mt-6 text-xs text-slate-500">
+                                    Full SDP, signaling, and candidate payloads are listed in the API Reference.
+                                </p>
+                            </section>
+
+                            <section id="websocket" className="scroll-mt-32">
+                                <DocsSectionHeader
+                                    eyebrow={<DocsEyebrow>Transport</DocsEyebrow>}
+                                    title="WebSocket Integration"
+                                    description="WebSocket sessions carry audio frames and JSON events over a single connection."
+                                />
+                                <div className="mt-8 space-y-6">
+                                    <DocsChecklist
+                                        items={[
+                                            'Create a session with transport = websocket (codec pcm16 or mulaw).',
+                                            'Connect to websocket_url and send the handshake payload.',
+                                            'Stream PCM16 or mulaw frames and listen for events.',
+                                        ]}
+                                    />
+                                    <div className="space-y-4">
+                                        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Handshake</p>
+                                        <DocsCodeBlock language="json" code={websocketHandshake} />
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section id="events" className="scroll-mt-32">
+                                <DocsSectionHeader
+                                    eyebrow={<DocsEyebrow>Events</DocsEyebrow>}
+                                    title="Events & Tool Calls"
+                                    description="Token events stream transcripts. Tool calls must be answered within 60 seconds."
+                                />
+                                <DocsKeyValueList
+                                    items={[
+                                        { label: 'token', value: 'User/assistant transcripts over data channel or WebSocket.' },
+                                        { label: 'tool.call', value: 'Execute a tool and reply with tool.result.' },
+                                        { label: 'tool.result', value: 'Echo tool_use_id with response or error.' },
+                                    ]}
+                                    className="mt-8"
+                                />
+                                <p className="mt-6 text-xs text-slate-500">
+                                    Full event payloads and error envelopes are in the API Reference.
+                                </p>
+                            </section>
+
+                            <section id="errors-limits" className="scroll-mt-32">
+                                <DocsCard variant="muted" size="lg">
+                                    <DocsSectionHeader
+                                        title="Errors & Limits"
+                                        description="Plan for validation errors, transport mismatches, and hard limits."
+                                    />
+                                    <DocsChecklist
+                                        items={[
+                                            'Tool calls time out after 60 seconds if no tool.result is returned.',
+                                            'Profile name must be 2-48 characters and unique per user.',
+                                            'System instructions are capped at 7,500 characters.',
+                                            'WebRTC only supports pcm16; WebSocket supports pcm16 or mulaw.',
+                                        ]}
+                                        className="mt-8"
+                                    />
+                                    <p className="mt-6 text-xs text-slate-500">
+                                        The full list of public error codes and limits is documented in the API Reference.
+                                    </p>
+                                </DocsCard>
+                            </section>
+                        </div>
                     }
                 />
             </DocsLayout>

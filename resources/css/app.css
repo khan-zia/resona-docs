@@ -12,8 +12,31 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-    --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-display: 'Space Grotesk', 'Manrope', ui-sans-serif, system-ui, sans-serif;
-    --font-brand: 'Inter', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Inter', 'Manrope', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Space Grotesk', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-brand: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+    /* Professional Documentation Palette */
+    --color-background-950: #020617;
+    --color-background-900: #0f172a;
+    --color-background-800: #1e293b;
+    
+    --color-accent-emerald: #10b981;
+    --color-accent-cyan: #06b6d4;
+    
+    --color-border-subtle: rgba(255, 255, 255, 0.05);
+    --color-border-muted: rgba(255, 255, 255, 0.1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-slate-950 text-slate-300 antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-slate-100 font-semibold tracking-tight;
+  }
 }
