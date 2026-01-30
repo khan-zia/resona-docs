@@ -12,3 +12,7 @@ Route::get('/guide', function () {
 Route::get('/api-reference', function () {
     return Inertia::render('ApiReference');
 })->name('api-reference');
+
+Route::get('/examples', function () {
+    return Inertia::render('Examples');
+})->name('examples');

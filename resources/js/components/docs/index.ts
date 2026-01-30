@@ -7,6 +7,7 @@ export { default as DocsEndpointGroup } from './DocsEndpointGroup';
 export { default as DocsEyebrow } from './DocsEyebrow';
 export { default as DocsFeatureCard } from './DocsFeatureCard';
 export { default as DocsHighlightList } from './DocsHighlightList';
+export { default as DocsInlineCode } from './DocsInlineCode';
 export { default as DocsKeyValueList } from './DocsKeyValueList';
 export { default as DocsPageShell } from './DocsPageShell';
 export { default as DocsSectionHeader } from './DocsSectionHeader';

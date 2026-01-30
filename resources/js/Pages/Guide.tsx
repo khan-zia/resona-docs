@@ -6,6 +6,7 @@ import {
     DocsChecklist,
     DocsCodeBlock,
     DocsEyebrow,
+    DocsInlineCode,
     DocsKeyValueList,
     DocsPageShell,
     DocsSectionHeader,
@@ -171,7 +172,7 @@ export default function Guide() {
                     onSectionChange={setActiveSection}
                     aside={null}
                     main={
-                        <div className="max-w-4xl space-y-24">
+                        <div className="max-w-4xl space-y-16">
                             <section id="quickstart" className="scroll-mt-32">
                                 <DocsSectionHeader
                                     eyebrow={<DocsEyebrow>Quickstart</DocsEyebrow>}
@@ -204,7 +205,7 @@ export default function Guide() {
                                     />
                                     <DocsStatCard
                                         label="Realtime"
-                                        value="https://<cluster_slug>.resona.dev"
+                                        value={'https://<cluster_slug>.resona.dev'}
                                         caption="Use cluster_base_url from session response"
                                     />
                                 </div>
@@ -271,9 +272,18 @@ export default function Guide() {
                                     />
                                     <DocsChecklist
                                         items={[
-                                            'Max 15 tools per profile; tools_json size must be 7,500 chars or less (minified).',
-                                            'Provide input_schema or parameters for every tool, not both, and keep it consistent across all tools.',
-                                            'Every object schema must include additionalProperties: false.',
+                                            <>
+                                                Max 15 tools per profile; <DocsInlineCode>tools_json</DocsInlineCode> size must be 7,500
+                                                chars or less (minified).
+                                            </>,
+                                            <>
+                                                Provide <DocsInlineCode>input_schema</DocsInlineCode> or{' '}
+                                                <DocsInlineCode>parameters</DocsInlineCode> for every tool, not both, and keep it
+                                                consistent across all tools.
+                                            </>,
+                                            <>
+                                                Every object schema must include <DocsInlineCode>additionalProperties: false</DocsInlineCode>.
+                                            </>,
                                             'Optional parameters across all tools cannot exceed 24.',
                                             'Max JSON Schema nesting depth is 5 levels.',
                                         ]}
@@ -324,11 +334,27 @@ export default function Guide() {
                                     />
                                     <DocsChecklist
                                         items={[
-                                            'Create a session with transport = webrtc and codec = pcm16.',
-                                            'Create RTCPeerConnection using ice_servers from session response.',
-                                            'Add microphone track and create data channel named events.',
-                                            'POST SDP offer to webrtc_url, apply sdp_answer.',
-                                            'Exchange ICE candidates using /webrtc/signal (preferred) or /webrtc/candidates.',
+                                            <>
+                                                Create a session with <DocsInlineCode>transport</DocsInlineCode> ={' '}
+                                                <DocsInlineCode>webrtc</DocsInlineCode> and <DocsInlineCode>codec</DocsInlineCode>{' '}
+                                                = <DocsInlineCode>pcm16</DocsInlineCode>.
+                                            </>,
+                                            <>
+                                                Create <DocsInlineCode>RTCPeerConnection</DocsInlineCode> using{' '}
+                                                <DocsInlineCode>ice_servers</DocsInlineCode> from the session response.
+                                            </>,
+                                            <>
+                                                Add a microphone track and create a data channel named{' '}
+                                                <DocsInlineCode>events</DocsInlineCode>.
+                                            </>,
+                                            <>
+                                                POST your SDP offer to <DocsInlineCode>webrtc_url</DocsInlineCode> and apply{' '}
+                                                <DocsInlineCode>sdp_answer</DocsInlineCode>.
+                                            </>,
+                                            <>
+                                                Exchange ICE candidates using <DocsInlineCode>/webrtc/signal</DocsInlineCode>{' '}
+                                                (preferred) or <DocsInlineCode>/webrtc/candidates</DocsInlineCode>.
+                                            </>,
                                         ]}
                                         className="mt-8"
                                     />
@@ -343,10 +369,26 @@ export default function Guide() {
                                 <div className="mt-8 space-y-6">
                                     <DocsChecklist
                                         items={[
-                                            'Create a session with transport = websocket (codec pcm16 or mulaw). For pcm16 you may include sample_rate; omit it to use the 16 kHz default.',
-                                            'Connect to websocket_url, send the handshake payload, and wait for the server ack.',
-                                            'Send 20 ms audio frames and listen for JSON events on the same socket.',
-                                            'Use audio_format.input_sample_rate and audio_format.output_sample_rate from the session response to configure capture and playback.',
+                                            <>
+                                                Create a session with <DocsInlineCode>transport</DocsInlineCode> ={' '}
+                                                <DocsInlineCode>websocket</DocsInlineCode> (codec{' '}
+                                                <DocsInlineCode>pcm16</DocsInlineCode> or <DocsInlineCode>mulaw</DocsInlineCode>).
+                                                For PCM you may include <DocsInlineCode>sample_rate</DocsInlineCode>; omit it to use
+                                                the 16 kHz default.
+                                            </>,
+                                            <>
+                                                Connect to <DocsInlineCode>websocket_url</DocsInlineCode>, send the{' '}
+                                                <DocsInlineCode>handshake</DocsInlineCode> payload, and wait for the server ack.
+                                            </>,
+                                            <>
+                                                Send <DocsInlineCode>20 ms</DocsInlineCode> audio frames and listen for JSON events
+                                                on the same socket.
+                                            </>,
+                                            <>
+                                                Use <DocsInlineCode>audio_format.input_sample_rate</DocsInlineCode> and{' '}
+                                                <DocsInlineCode>audio_format.output_sample_rate</DocsInlineCode> from the session response
+                                                to configure capture and playback.
+                                            </>,
                                         ]}
                                     />
                                     <DocsCard variant="muted" size="md">
@@ -358,9 +400,18 @@ export default function Guide() {
                                         />
                                         <DocsChecklist
                                             items={[
-                                                'PCM16 frame bytes = sample_rate * 0.02 * 2. Examples: 16 kHz -> 640 bytes, 24 kHz -> 960 bytes, 48 kHz -> 1920 bytes.',
-                                                'Mulaw is fixed at 8 kHz: 160 bytes per 20 ms frame.',
-                                                'PCM16 must be mono, little-endian.',
+                                                <>
+                                                    <DocsInlineCode>pcm16</DocsInlineCode> frame bytes ={' '}
+                                                    <DocsInlineCode>sample_rate</DocsInlineCode> * 0.02 * 2. Examples: 16 kHz: 640
+                                                    bytes, 24 kHz: 960 bytes, 48 kHz: 1920 bytes.
+                                                </>,
+                                                <>
+                                                    <DocsInlineCode>mulaw</DocsInlineCode> is fixed at 8 kHz: 160 bytes per{' '}
+                                                    <DocsInlineCode>20 ms</DocsInlineCode> frame.
+                                                </>,
+                                                <>
+                                                    <DocsInlineCode>pcm16</DocsInlineCode> must be mono, little-endian.
+                                                </>,
                                             ]}
                                             className="mt-6"
                                         />
@@ -374,11 +425,27 @@ export default function Guide() {
                                         />
                                         <DocsChecklist
                                             items={[
-                                                'If you control capture directly, you usually already know the input sample rate. Send that value as sample_rate.',
-                                                'If you are in a browser, you may not be able to force capture rate. Use MediaStreamTrack.getSettings().sampleRate when available.',
-                                                'If the browser does not expose it, fall back to AudioContext.sampleRate (often the output device default).',
-                                                'Only send sample_rate when it aligns to 20 ms frames (divisible by 50).',
-                                                'If you cannot determine a safe value, omit sample_rate and Resona defaults to 16 kHz for PCM.',
+                                                <>
+                                                    If you control capture directly, you usually already know the input sample rate. Send that value
+                                                    as <DocsInlineCode>sample_rate</DocsInlineCode>.
+                                                </>,
+                                                <>
+                                                    If you are in a browser, you may not be able to force capture rate. Use{' '}
+                                                    <DocsInlineCode>MediaStreamTrack.getSettings().sampleRate</DocsInlineCode> when available.
+                                                </>,
+                                                <>
+                                                    If the browser does not expose it, fall back to{' '}
+                                                    <DocsInlineCode>AudioContext.sampleRate</DocsInlineCode> (often the output device
+                                                    default).
+                                                </>,
+                                                <>
+                                                    Only send <DocsInlineCode>sample_rate</DocsInlineCode> when it aligns to{' '}
+                                                    <DocsInlineCode>20 ms</DocsInlineCode> frames (divisible by 50).
+                                                </>,
+                                                <>
+                                                    If you cannot determine a safe value, omit <DocsInlineCode>sample_rate</DocsInlineCode>{' '}
+                                                    and Resona defaults to 16 kHz for PCM.
+                                                </>,
                                             ]}
                                             className="mt-6"
                                         />
@@ -436,10 +503,18 @@ export default function Guide() {
                                     />
                                     <DocsChecklist
                                         items={[
-                                            'Tool calls time out after 60 seconds if no tool.result is returned.',
+                                            <>
+                                                Tool calls time out after 60 seconds if no <DocsInlineCode>tool.result</DocsInlineCode>{' '}
+                                                is returned.
+                                            </>,
                                             'Profile name must be 2-48 characters and unique per user.',
-                                            'System instructions are capped at 7,500 characters.',
-                                            'WebRTC only supports pcm16; WebSocket supports pcm16 or mulaw.',
+                                            <>
+                                                <DocsInlineCode>system_instructions</DocsInlineCode> are capped at 7,500 characters.
+                                            </>,
+                                            <>
+                                                WebRTC only supports <DocsInlineCode>pcm16</DocsInlineCode>; WebSocket supports{' '}
+                                                <DocsInlineCode>pcm16</DocsInlineCode> or <DocsInlineCode>mulaw</DocsInlineCode>.
+                                            </>,
                                         ]}
                                         className="mt-8"
                                     />

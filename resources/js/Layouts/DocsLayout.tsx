@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 
-type NavKey = 'guide' | 'api';
+type NavKey = 'guide' | 'api' | 'examples';
 
 type DocsLayoutProps = {
     title: string;
@@ -13,6 +13,7 @@ type DocsLayoutProps = {
 const navItems: Array<{ key: NavKey; label: string; href: string }> = [
     { key: 'guide', label: 'Guide', href: '/guide' },
     { key: 'api', label: 'API Reference', href: '/api-reference' },
+    { key: 'examples', label: 'Examples', href: '/examples' },
 ];
 
 export default function DocsLayout({ title, subtitle, active, children }: DocsLayoutProps) {

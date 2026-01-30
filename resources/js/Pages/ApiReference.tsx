@@ -7,6 +7,7 @@ import {
     DocsCodeBlock,
     DocsEndpointGroup,
     DocsEyebrow,
+    DocsInlineCode,
     DocsKeyValueList,
     DocsPageShell,
     DocsSectionHeader,
@@ -493,7 +494,7 @@ export default function ApiReference() {
                     onSectionChange={setActiveSection}
                     aside={null}
                     main={
-                        <div className="max-w-4xl space-y-24">
+                        <div className="max-w-4xl space-y-16">
                             <section id="base-urls" className="scroll-mt-32">
                                 <DocsSectionHeader
                                     title="Production URL Conventions"
@@ -507,7 +508,7 @@ export default function ApiReference() {
                                     />
                                     <DocsStatCard
                                         label="Realtime Cluster"
-                                        value="https://<cluster_slug>.resona.dev"
+                                        value={'https://<cluster_slug>.resona.dev'}
                                         caption="Example: https://us-east.resona.dev"
                                     />
                                 </div>
@@ -559,19 +560,19 @@ export default function ApiReference() {
                                     <DocsCodeBlock language="json" code={agentProfileResponse} />
                                     <div className="grid gap-x-12 gap-y-8 sm:grid-cols-2">
                                         <div className="space-y-2">
-                                            <h3 className="text-sm font-bold text-white"><code>agent_id</code></h3>
+                                            <h3 className="text-sm font-bold text-white"><DocsInlineCode>agent_id</DocsInlineCode></h3>
                                             <p className="text-[14px] text-slate-400">Route key (not the numeric database id).</p>
                                         </div>
                                         <div className="space-y-2">
-                                            <h3 className="text-sm font-bold text-white"><code>voice</code></h3>
+                                            <h3 className="text-sm font-bold text-white"><DocsInlineCode>voice</DocsInlineCode></h3>
                                             <p className="text-[14px] text-slate-400">Unique voice name from the catalog, case-insensitive in requests.</p>
                                         </div>
                                         <div className="space-y-2">
-                                            <h3 className="text-sm font-bold text-white"><code>tools_json</code></h3>
+                                            <h3 className="text-sm font-bold text-white"><DocsInlineCode>tools_json</DocsInlineCode></h3>
                                             <p className="text-[14px] text-slate-400">Stored as JSON and returned as an array.</p>
                                         </div>
                                         <div className="space-y-2">
-                                            <h3 className="text-sm font-bold text-white"><code>domain_context</code></h3>
+                                            <h3 className="text-sm font-bold text-white"><DocsInlineCode>domain_context</DocsInlineCode></h3>
                                             <p className="text-[14px] text-slate-400">Stored as JSON and returned as an object (or null).</p>
                                         </div>
                                     </div>
@@ -724,13 +725,23 @@ export default function ApiReference() {
                                             <div className="space-y-3">
                                                 <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">Allowed</p>
                                                 <div className="flex flex-wrap gap-2 text-sm leading-relaxed text-slate-300">
-                                                    <code>type</code>, <code>properties</code>, <code>required</code>, <code>items</code>, <code>enum</code>, <code>const</code>, <code>format</code>, <code>pattern</code>, <code>anyOf</code>, <code>allOf</code>, <code>$ref</code>, <code>$defs</code>
+                                                    <DocsInlineCode>type</DocsInlineCode>, <DocsInlineCode>properties</DocsInlineCode>,{' '}
+                                                    <DocsInlineCode>required</DocsInlineCode>, <DocsInlineCode>items</DocsInlineCode>,{' '}
+                                                    <DocsInlineCode>enum</DocsInlineCode>, <DocsInlineCode>const</DocsInlineCode>,{' '}
+                                                    <DocsInlineCode>format</DocsInlineCode>, <DocsInlineCode>pattern</DocsInlineCode>,{' '}
+                                                    <DocsInlineCode>anyOf</DocsInlineCode>, <DocsInlineCode>allOf</DocsInlineCode>,{' '}
+                                                    <DocsInlineCode>$ref</DocsInlineCode>, <DocsInlineCode>$defs</DocsInlineCode>
                                                 </div>
                                             </div>
                                             <div className="space-y-3">
                                                 <p className="text-[10px] font-bold uppercase tracking-widest text-rose-500">Not supported</p>
                                                 <div className="flex flex-wrap gap-2 text-sm leading-relaxed text-slate-400">
-                                                    <code>oneOf</code>, <code>not</code>, <code>if</code>, <code>then</code>, <code>else</code>, <code>minimum</code>, <code>maximum</code>, <code>minLength</code>, <code>maxLength</code>, <code>maxItems</code>, <code>uniqueItems</code>
+                                                    <DocsInlineCode>oneOf</DocsInlineCode>, <DocsInlineCode>not</DocsInlineCode>,{' '}
+                                                    <DocsInlineCode>if</DocsInlineCode>, <DocsInlineCode>then</DocsInlineCode>,{' '}
+                                                    <DocsInlineCode>else</DocsInlineCode>, <DocsInlineCode>minimum</DocsInlineCode>,{' '}
+                                                    <DocsInlineCode>maximum</DocsInlineCode>, <DocsInlineCode>minLength</DocsInlineCode>,{' '}
+                                                    <DocsInlineCode>maxLength</DocsInlineCode>, <DocsInlineCode>maxItems</DocsInlineCode>,{' '}
+                                                    <DocsInlineCode>uniqueItems</DocsInlineCode>
                                                 </div>
                                             </div>
                                         </div>
@@ -845,11 +856,11 @@ export default function ApiReference() {
                                 <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2">
                                     <div className="space-y-2">
                                         <h4 className="text-sm font-semibold text-emerald-400">transport</h4>
-                                        <p className="text-sm leading-relaxed text-slate-400">Required. <code className="text-emerald-400">webrtc</code> or <code className="text-emerald-400">websocket</code>.</p>
+                                        <p className="text-sm leading-relaxed text-slate-400">Required. <DocsInlineCode>webrtc</DocsInlineCode> or <DocsInlineCode>websocket</DocsInlineCode>.</p>
                                     </div>
                                     <div className="space-y-2">
                                         <h4 className="text-sm font-semibold text-emerald-400">codec</h4>
-                                        <p className="text-sm leading-relaxed text-slate-400">Optional. Defaults to <code className="text-emerald-400">pcm16</code>. WebRTC requires <code className="text-emerald-400">pcm16</code>; WebSocket supports <code className="text-emerald-400">pcm16</code> or <code className="text-emerald-400">mulaw</code>.</p>
+                                        <p className="text-sm leading-relaxed text-slate-400">Optional. Defaults to <DocsInlineCode>pcm16</DocsInlineCode>. WebRTC requires <DocsInlineCode>pcm16</DocsInlineCode>; WebSocket supports <DocsInlineCode>pcm16</DocsInlineCode> or <DocsInlineCode>mulaw</DocsInlineCode>.</p>
                                     </div>
                                     <div className="space-y-2">
                                         <h4 className="text-sm font-semibold text-emerald-400">sample_rate</h4>
@@ -861,7 +872,7 @@ export default function ApiReference() {
                                     </div>
                                     <div className="space-y-2">
                                         <h4 className="text-sm font-semibold text-emerald-400">WebSocket audio_format</h4>
-                                        <p className="text-sm leading-relaxed text-slate-400"><code className="text-emerald-400">pcm16</code>: input/output match the negotiated sample_rate; <code className="text-emerald-400">mulaw</code>: input/output fixed at 8000.</p>
+                                        <p className="text-sm leading-relaxed text-slate-400"><DocsInlineCode>pcm16</DocsInlineCode>: input/output match the negotiated sample_rate; <DocsInlineCode>mulaw</DocsInlineCode>: input/output fixed at 8000.</p>
                                     </div>
                                 </div>
                             </section>
@@ -907,9 +918,17 @@ export default function ApiReference() {
                                         />
                                         <DocsChecklist
                                             items={[
-                                                'PCM16 frame bytes = sample_rate * 0.02 * 2. Example: 16 kHz -> 640 bytes, 48 kHz -> 1920 bytes.',
-                                                'Mulaw frame bytes = 8000 * 0.02 * 1 = 160 bytes.',
-                                                'If you send a different size, the server will reject the frame.',
+                                                <>
+                                                    <DocsInlineCode>pcm16</DocsInlineCode> frame bytes ={' '}
+                                                    <DocsInlineCode>sample_rate</DocsInlineCode> * 0.02 * 2. Example: 16 kHz: 640
+                                                    bytes, 48 kHz: 1920 bytes.
+                                                </>,
+                                                <>
+                                                    <DocsInlineCode>mulaw</DocsInlineCode> frame bytes = 8000 * 0.02 * 1 = 160 bytes.
+                                                </>,
+                                                <>
+                                                    If you send a different size, the server will reject the <DocsInlineCode>frame</DocsInlineCode>.
+                                                </>,
                                             ]}
                                             className="mt-6"
                                         />
@@ -934,9 +953,19 @@ export default function ApiReference() {
                                     </div>
                                     <DocsChecklist
                                         items={[
-                                            'ice_restart is required only when renegotiating an existing peer.',
-                                            'If you call /webrtc/sdp while a peer is active and ice_restart is false, the server returns a conflict error.',
-                                            'sdp_offer must be a non-empty string and session_id/token must be valid.',
+                                            <>
+                                                <DocsInlineCode>ice_restart</DocsInlineCode> is required only when renegotiating an
+                                                existing peer.
+                                            </>,
+                                            <>
+                                                If you call <DocsInlineCode>/webrtc/sdp</DocsInlineCode> while a peer is active and{' '}
+                                                <DocsInlineCode>ice_restart</DocsInlineCode> is false, the server returns a conflict error.
+                                            </>,
+                                            <>
+                                                <DocsInlineCode>sdp_offer</DocsInlineCode> must be a non-empty string and{' '}
+                                                <DocsInlineCode>session_id</DocsInlineCode> / <DocsInlineCode>token</DocsInlineCode>{' '}
+                                                must be valid.
+                                            </>,
                                             'The server validates that the session is WebRTC-capable before negotiating.',
                                         ]}
                                     />
@@ -953,7 +982,7 @@ export default function ApiReference() {
                                         <DocsSectionHeader
                                             title="A) WebSocket signaling"
                                             titleClassName="!text-lg"
-                                            description="Endpoint: wss://<cluster_slug>.resona.dev/webrtc/signal"
+                                            description={'Endpoint: wss://<cluster_slug>.resona.dev/webrtc/signal'}
                                         />
                                         <div className="mt-6 space-y-6">
                                             <div className="space-y-4">
@@ -978,11 +1007,24 @@ export default function ApiReference() {
                                             </div>
                                             <DocsChecklist
                                                 items={[
-                                                    'Handshake must be the first message on the signaling socket.',
-                                                    'Send candidates as they are gathered; use complete: true when done.',
-                                                    'Server sends ice.candidate events and then ice.candidate.complete.',
+                                                    <>
+                                                        <DocsInlineCode>handshake</DocsInlineCode> must be the first message on the signaling
+                                                        socket.
+                                                    </>,
+                                                    <>
+                                                        Send candidates as they are gathered; use <DocsInlineCode>complete: true</DocsInlineCode>{' '}
+                                                        when done.
+                                                    </>,
+                                                    <>
+                                                        Server sends <DocsInlineCode>ice.candidate</DocsInlineCode> events and then{' '}
+                                                        <DocsInlineCode>ice.candidate.complete</DocsInlineCode>.
+                                                    </>,
                                                     'No control commands are sent to clients over signaling.',
-                                                    'To restart ICE, create a new SDP offer (ICE restart enabled) and call /webrtc/sdp with ice_restart true.',
+                                                    <>
+                                                        To restart ICE, create a new SDP offer (ICE restart enabled) and call{' '}
+                                                        <DocsInlineCode>/webrtc/sdp</DocsInlineCode> with{' '}
+                                                        <DocsInlineCode>ice_restart</DocsInlineCode> true.
+                                                    </>,
                                                 ]}
                                             />
                                         </div>
@@ -992,7 +1034,7 @@ export default function ApiReference() {
                                         <DocsSectionHeader
                                             title="B) HTTP polling"
                                             titleClassName="!text-lg"
-                                            description="Endpoint: https://<cluster_slug>.resona.dev/webrtc/candidates"
+                                            description={'Endpoint: https://<cluster_slug>.resona.dev/webrtc/candidates'}
                                         />
                                         <div className="mt-6 space-y-6">
                                             <div className="space-y-4">
@@ -1006,10 +1048,21 @@ export default function ApiReference() {
                                             <DocsChecklist
                                                 items={[
                                                     'This endpoint can upload local candidates and poll for remote candidates in one call.',
-                                                    'wait: true enables long-polling; timeout_ms is clamped between 100 and 15000 ms.',
-                                                    'timeout_ms defaults to 5000 ms if omitted.',
-                                                    'complete: true signals that local ICE gathering is finished (candidates may be omitted).',
-                                                    'If wait is false, responses are immediate and may include previously returned candidates; deduplicate by candidate string if needed.',
+                                                    <>
+                                                        <DocsInlineCode>wait: true</DocsInlineCode> enables long-polling;{' '}
+                                                        <DocsInlineCode>timeout_ms</DocsInlineCode> is clamped between 100 and 15000 ms.
+                                                    </>,
+                                                    <>
+                                                        <DocsInlineCode>timeout_ms</DocsInlineCode> defaults to 5000 ms if omitted.
+                                                    </>,
+                                                    <>
+                                                        <DocsInlineCode>complete: true</DocsInlineCode> signals that local ICE gathering is
+                                                        finished (candidates may be omitted).
+                                                    </>,
+                                                    <>
+                                                        If <DocsInlineCode>wait</DocsInlineCode> is false, responses are immediate and may
+                                                        include previously returned candidates; deduplicate by candidate string if needed.
+                                                    </>,
                                                 ]}
                                             />
                                         </div>
@@ -1056,7 +1109,7 @@ export default function ApiReference() {
                                 <div className="mt-8">
                                     <div className="space-y-2">
                                         <h4 className="text-sm font-semibold text-emerald-400">Data channel</h4>
-                                        <p className="text-sm leading-relaxed text-slate-400"><code className="text-emerald-400">Label: events</code>, <code className="text-emerald-400">ordered: true</code></p>
+                                        <p className="text-sm leading-relaxed text-slate-400"><DocsInlineCode>Label: events</DocsInlineCode>, <DocsInlineCode>ordered: true</DocsInlineCode></p>
                                     </div>
                                 </div>
                             </section>
