@@ -78,10 +78,17 @@ const createProfileRequest = String.raw`{
     ]
 }`;
 
-const createSessionRequest = String.raw`{
+const createSessionRequestWebrtc = String.raw`{
     "agent_id": "agent-3e6f2a41-0f6b-4c4b-a4d5-9e2a4b1e2a3c",
     "transport": "webrtc",
     "codec": "pcm16"
+}`;
+
+const createSessionRequestWebsocket = String.raw`{
+    "agent_id": "agent-3e6f2a41-0f6b-4c4b-a4d5-9e2a4b1e2a3c",
+    "transport": "websocket",
+    "codec": "pcm16",
+    "sample_rate": 48000
 }`;
 
 const webrtcSessionResponse = String.raw`{
@@ -118,7 +125,7 @@ const websocketSessionResponse = String.raw`{
     "cluster_base_url": "https://us-east.resona.dev",
     "audio_format": {
         "input_codec": "pcm16",
-        "input_sample_rate": 16000,
+        "input_sample_rate": 48000,
         "output_codec": "pcm16",
         "output_sample_rate": 48000
     }
@@ -283,8 +290,12 @@ export default function Guide() {
                                 />
                                 <div className="mt-8 space-y-6">
                                     <div className="space-y-4">
-                                        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Create Session (Request)</p>
-                                        <DocsCodeBlock language="json" code={createSessionRequest} />
+                                        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Create Session (WebRTC Request)</p>
+                                        <DocsCodeBlock language="json" code={createSessionRequestWebrtc} />
+                                    </div>
+                                    <div className="space-y-4">
+                                        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Create Session (WebSocket Request)</p>
+                                        <DocsCodeBlock language="json" code={createSessionRequestWebsocket} />
                                     </div>
                                     <div className="space-y-4">
                                         <p className="text-xs font-bold uppercase tracking-widest text-slate-500">WebRTC Response</p>
@@ -332,11 +343,46 @@ export default function Guide() {
                                 <div className="mt-8 space-y-6">
                                     <DocsChecklist
                                         items={[
-                                            'Create a session with transport = websocket (codec pcm16 or mulaw).',
-                                            'Connect to websocket_url and send the handshake payload.',
-                                            'Stream PCM16 or mulaw frames and listen for events.',
+                                            'Create a session with transport = websocket (codec pcm16 or mulaw). For pcm16 you may include sample_rate; omit it to use the 16 kHz default.',
+                                            'Connect to websocket_url, send the handshake payload, and wait for the server ack.',
+                                            'Send 20 ms audio frames and listen for JSON events on the same socket.',
+                                            'Use audio_format.input_sample_rate and audio_format.output_sample_rate from the session response to configure capture and playback.',
                                         ]}
                                     />
+                                    <DocsCard variant="muted" size="md">
+                                        <DocsSectionHeader
+                                            title="Audio framing (20 ms)"
+                                            titleClassName="!text-lg"
+                                            description="Every binary message must contain exactly 20 ms of audio so the server can keep pace without jitter."
+                                            descriptionClassName="text-sm"
+                                        />
+                                        <DocsChecklist
+                                            items={[
+                                                'PCM16 frame bytes = sample_rate * 0.02 * 2. Examples: 16 kHz -> 640 bytes, 24 kHz -> 960 bytes, 48 kHz -> 1920 bytes.',
+                                                'Mulaw is fixed at 8 kHz: 160 bytes per 20 ms frame.',
+                                                'PCM16 must be mono, little-endian.',
+                                            ]}
+                                            className="mt-6"
+                                        />
+                                    </DocsCard>
+                                    <DocsCard variant="muted" size="md">
+                                        <DocsSectionHeader
+                                            title="Choosing a sample rate"
+                                            titleClassName="!text-lg"
+                                            description="The right sample_rate depends on how you capture audio. If you control the capture pipeline (native app, server-to-server, or custom DSP), use the rate your audio stack is already producing."
+                                            descriptionClassName="text-sm"
+                                        />
+                                        <DocsChecklist
+                                            items={[
+                                                'If you control capture directly, you usually already know the input sample rate. Send that value as sample_rate.',
+                                                'If you are in a browser, you may not be able to force capture rate. Use MediaStreamTrack.getSettings().sampleRate when available.',
+                                                'If the browser does not expose it, fall back to AudioContext.sampleRate (often the output device default).',
+                                                'Only send sample_rate when it aligns to 20 ms frames (divisible by 50).',
+                                                'If you cannot determine a safe value, omit sample_rate and Resona defaults to 16 kHz for PCM.',
+                                            ]}
+                                            className="mt-6"
+                                        />
+                                    </DocsCard>
                                     <div className="space-y-4">
                                         <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Handshake</p>
                                         <DocsCodeBlock language="json" code={websocketHandshake} />

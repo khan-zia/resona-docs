@@ -229,10 +229,17 @@ const deleteProfileError = String.raw`{
     }
 }`;
 
-const createSessionRequest = String.raw`{
+const createSessionRequestWebrtc = String.raw`{
     "agent_id": "agent-3e6f2a41-0f6b-4c4b-a4d5-9e2a4b1e2a3c",
     "transport": "webrtc",
     "codec": "pcm16"
+}`;
+
+const createSessionRequestWebsocket = String.raw`{
+    "agent_id": "agent-3e6f2a41-0f6b-4c4b-a4d5-9e2a4b1e2a3c",
+    "transport": "websocket",
+    "codec": "pcm16",
+    "sample_rate": 48000
 }`;
 
 const webrtcSessionResponse = String.raw`{
@@ -269,7 +276,7 @@ const websocketSessionResponse = String.raw`{
     "cluster_base_url": "https://us-east.resona.dev",
     "audio_format": {
         "input_codec": "pcm16",
-        "input_sample_rate": 16000,
+        "input_sample_rate": 48000,
         "output_codec": "pcm16",
         "output_sample_rate": 48000
     }
@@ -815,8 +822,12 @@ export default function ApiReference() {
                                 </div>
                                 <div className="mt-10 space-y-8">
                                     <div className="space-y-4">
-                                        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Create Session (Request)</p>
-                                        <DocsCodeBlock language="json" code={createSessionRequest} />
+                                        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Create Session (WebRTC Request)</p>
+                                        <DocsCodeBlock language="json" code={createSessionRequestWebrtc} />
+                                    </div>
+                                    <div className="space-y-4">
+                                        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Create Session (WebSocket Request)</p>
+                                        <DocsCodeBlock language="json" code={createSessionRequestWebsocket} />
                                     </div>
                                     <div className="space-y-4">
                                         <p className="text-xs font-bold uppercase tracking-widest text-slate-500">WebRTC Response (201)</p>
@@ -841,8 +852,8 @@ export default function ApiReference() {
                                         <p className="text-sm leading-relaxed text-slate-400">Optional. Defaults to <code className="text-emerald-400">pcm16</code>. WebRTC requires <code className="text-emerald-400">pcm16</code>; WebSocket supports <code className="text-emerald-400">pcm16</code> or <code className="text-emerald-400">mulaw</code>.</p>
                                     </div>
                                     <div className="space-y-2">
-                                        <h4 className="text-sm font-semibold text-emerald-400">WebRTC input sample rate</h4>
-                                        <p className="text-sm leading-relaxed text-slate-400">Any value &gt;= 16000 (not returned in response).</p>
+                                        <h4 className="text-sm font-semibold text-emerald-400">sample_rate</h4>
+                                        <p className="text-sm leading-relaxed text-slate-400">WebSocket only. For pcm16, send a value that aligns to 20 ms frames (must be divisible by 50). If omitted, Resona defaults to 16 kHz. For mulaw, the only valid value is 8000.</p>
                                     </div>
                                     <div className="space-y-2">
                                         <h4 className="text-sm font-semibold text-emerald-400">ICE servers</h4>
@@ -850,7 +861,7 @@ export default function ApiReference() {
                                     </div>
                                     <div className="space-y-2">
                                         <h4 className="text-sm font-semibold text-emerald-400">WebSocket audio_format</h4>
-                                        <p className="text-sm leading-relaxed text-slate-400"><code className="text-emerald-400">pcm16</code>: input 16000/output 48000; <code className="text-emerald-400">mulaw</code>: input 8000/output 8000.</p>
+                                        <p className="text-sm leading-relaxed text-slate-400"><code className="text-emerald-400">pcm16</code>: input/output match the negotiated sample_rate; <code className="text-emerald-400">mulaw</code>: input/output fixed at 8000.</p>
                                     </div>
                                 </div>
                             </section>
@@ -871,18 +882,38 @@ export default function ApiReference() {
                                     </div>
                                     <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
                                         <div className="space-y-2">
-                                            <h4 className="text-sm font-semibold text-emerald-400">Inbound audio</h4>
-                                            <p className="text-sm leading-relaxed text-slate-400">16 kHz mono PCM16 little-endian (20ms chunks recommended).</p>
+                                            <h4 className="text-sm font-semibold text-emerald-400">Inbound audio (pcm16)</h4>
+                                            <p className="text-sm leading-relaxed text-slate-400">Mono PCM16 little-endian at the negotiated sample_rate (defaults to 16 kHz). Frames must be exactly 20 ms each.</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <h4 className="text-sm font-semibold text-emerald-400">Inbound audio (mulaw)</h4>
+                                            <p className="text-sm leading-relaxed text-slate-400">Mulaw is fixed at 8 kHz. Frames must be exactly 20 ms each.</p>
                                         </div>
                                         <div className="space-y-2">
                                             <h4 className="text-sm font-semibold text-emerald-400">Outbound audio (pcm16)</h4>
-                                            <p className="text-sm leading-relaxed text-slate-400">Raw PCM16 frames at 48 kHz.</p>
+                                            <p className="text-sm leading-relaxed text-slate-400">Raw PCM16 frames at audio_format.output_sample_rate (matches input sample_rate).</p>
                                         </div>
                                         <div className="space-y-2">
                                             <h4 className="text-sm font-semibold text-emerald-400">Outbound audio (mulaw)</h4>
                                             <p className="text-sm leading-relaxed text-slate-400">Mulaw frames at 8 kHz.</p>
                                         </div>
                                     </div>
+                                    <DocsCard variant="muted" size="md">
+                                        <DocsSectionHeader
+                                            title="Frame sizing"
+                                            titleClassName="!text-lg"
+                                            description="Each binary message must contain exactly one 20 ms audio frame."
+                                            descriptionClassName="text-sm"
+                                        />
+                                        <DocsChecklist
+                                            items={[
+                                                'PCM16 frame bytes = sample_rate * 0.02 * 2. Example: 16 kHz -> 640 bytes, 48 kHz -> 1920 bytes.',
+                                                'Mulaw frame bytes = 8000 * 0.02 * 1 = 160 bytes.',
+                                                'If you send a different size, the server will reject the frame.',
+                                            ]}
+                                            className="mt-6"
+                                        />
+                                    </DocsCard>
                                 </div>
                             </section>
 
