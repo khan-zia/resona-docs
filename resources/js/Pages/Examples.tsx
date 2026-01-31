@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import DocsLayout from '../Layouts/DocsLayout';
-import { DocsMarkdown, DocsPageShell } from '../components/docs';
+import { DocsCopyPageButton, DocsMarkdown, DocsPageShell } from '../components/docs';
 import classes from '../utils/classes';
 import { useState } from 'react';
 
@@ -34,6 +34,7 @@ const sections = [
 
 export default function Examples() {
     const [activeSection, setActiveSection] = useState('overview');
+    const copySections = sections.map((section) => ({ markdown: section.markdown }));
 
     return (
         <>
@@ -42,6 +43,13 @@ export default function Examples() {
                 title="Code Examples"
                 subtitle="Copy-paste starters for WebRTC and WebSocket. Keep them simple, then layer on production features."
                 active="examples"
+                actions={
+                    <DocsCopyPageButton
+                        title="Code Examples"
+                        subtitle="Copy-paste starters for WebRTC and WebSocket. Keep them simple, then layer on production features."
+                        sections={copySections}
+                    />
+                }
             >
                 <DocsPageShell
                     nav={

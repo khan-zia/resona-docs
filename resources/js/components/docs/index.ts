@@ -3,6 +3,7 @@ export { default as DocsBadge } from './DocsBadge';
 export { default as DocsCard } from './DocsCard';
 export { default as DocsChecklist } from './DocsChecklist';
 export { default as DocsCodeBlock } from './DocsCodeBlock';
+export { default as DocsCopyPageButton } from './DocsCopyPageButton';
 export { default as DocsEndpointGroup } from './DocsEndpointGroup';
 export { default as DocsEyebrow } from './DocsEyebrow';
 export { default as DocsFeatureCard } from './DocsFeatureCard';

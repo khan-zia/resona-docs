@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import DocsLayout from '../Layouts/DocsLayout';
-import { DocsMarkdown, DocsPageShell } from '../components/docs';
+import { DocsCopyPageButton, DocsMarkdown, DocsPageShell } from '../components/docs';
 import classes from '../utils/classes';
 import { useState } from 'react';
 
@@ -40,6 +40,7 @@ const sections = [
 
 export default function Guide() {
     const [activeSection, setActiveSection] = useState('quickstart');
+    const copySections = sections.map((section) => ({ markdown: section.markdown }));
 
     return (
         <>
@@ -48,6 +49,13 @@ export default function Guide() {
                 title="Integration Guide"
                 subtitle="Build professional voice experiences with Resona - from first request to production launch."
                 active="guide"
+                actions={
+                    <DocsCopyPageButton
+                        title="Integration Guide"
+                        subtitle="Build professional voice experiences with Resona - from first request to production launch."
+                        sections={copySections}
+                    />
+                }
             >
                 <DocsPageShell
                     nav={

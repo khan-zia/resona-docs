@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 type NavKey = 'guide' | 'api' | 'examples';
 
@@ -7,6 +7,7 @@ type DocsLayoutProps = {
     title: string;
     subtitle: string;
     active: NavKey;
+    actions?: ReactNode;
     children: ReactNode;
 };
 
@@ -16,7 +17,9 @@ const navItems: Array<{ key: NavKey; label: string; href: string }> = [
     { key: 'examples', label: 'Examples', href: '/examples' },
 ];
 
-export default function DocsLayout({ title, subtitle, active, children }: DocsLayoutProps) {
+export default function DocsLayout({ title, subtitle, active, actions, children }: DocsLayoutProps) {
+    const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
     return (
         <div className="relative min-h-screen bg-slate-950 font-sans selection:bg-emerald-500/30">
             {/* Subtle background effects */}
@@ -47,7 +50,7 @@ export default function DocsLayout({ title, subtitle, active, children }: DocsLa
                         </span>
                     </Link>
                     
-                    <nav className="flex items-center gap-1">
+                    <nav className="hidden items-center gap-1 md:flex">
                         {navItems.map((item) => {
                             const isActive = item.key === active;
 
@@ -69,7 +72,46 @@ export default function DocsLayout({ title, subtitle, active, children }: DocsLa
                             );
                         })}
                     </nav>
+                    <button
+                        type="button"
+                        aria-label={mobileNavOpen ? 'Close navigation' : 'Open navigation'}
+                        onClick={() => setMobileNavOpen((value) => !value)}
+                        className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-200 transition hover:bg-white/10"
+                    >
+                        {mobileNavOpen ? (
+                            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6l-12 12" />
+                            </svg>
+                        ) : (
+                            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        )}
+                    </button>
                 </div>
+                {mobileNavOpen ? (
+                    <div className="md:hidden border-t border-white/5">
+                        <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-1 px-6 py-3">
+                            {navItems.map((item) => {
+                                const isActive = item.key === active;
+                                return (
+                                    <Link
+                                        key={item.key}
+                                        href={item.href}
+                                        onClick={() => setMobileNavOpen(false)}
+                                        className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
+                                            isActive
+                                                ? 'bg-white/10 text-white'
+                                                : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+                                        }`}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    </div>
+                ) : null}
             </header>
 
             <main className="relative z-10 mx-auto w-full max-w-[1400px] px-6 pb-24 pt-16">
@@ -78,13 +120,20 @@ export default function DocsLayout({ title, subtitle, active, children }: DocsLa
                         <span className="h-px w-8 bg-emerald-500/50" />
                         <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-emerald-400/80">Documentation</p>
                     </div>
-                    <div className="space-y-4">
-                        <h1 className="font-display text-4xl font-bold tracking-tight text-white sm:text-6xl">
-                            {title}
-                        </h1>
-                        <p className="max-w-3xl text-xl leading-relaxed text-slate-400">
-                            {subtitle}
-                        </p>
+                    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="space-y-4">
+                            <h1 className="font-display text-4xl font-bold tracking-tight text-white sm:text-6xl">
+                                {title}
+                            </h1>
+                            <p className="max-w-3xl text-xl leading-relaxed text-slate-400">
+                                {subtitle}
+                            </p>
+                        </div>
+                        {actions ? (
+                            <div className="flex justify-start lg:justify-end">
+                                {actions}
+                            </div>
+                        ) : null}
                     </div>
                 </div>
 

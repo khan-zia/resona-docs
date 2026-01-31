@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import DocsLayout from '../Layouts/DocsLayout';
-import { DocsMarkdown, DocsPageShell } from '../components/docs';
+import { DocsCopyPageButton, DocsMarkdown, DocsPageShell } from '../components/docs';
 import classes from '../utils/classes';
 import { useState } from 'react';
 
@@ -58,6 +58,7 @@ const sections = [
 
 export default function ApiReference() {
     const [activeSection, setActiveSection] = useState('base-urls');
+    const copySections = sections.map((section) => ({ markdown: section.markdown }));
 
     return (
         <>
@@ -66,6 +67,13 @@ export default function ApiReference() {
                 title="API Reference"
                 subtitle="The complete technical specification for Resona's public REST and realtime APIs."
                 active="api"
+                actions={
+                    <DocsCopyPageButton
+                        title="API Reference"
+                        subtitle="The complete technical specification for Resona's public REST and realtime APIs."
+                        sections={copySections}
+                    />
+                }
             >
                 <DocsPageShell
                     nav={
